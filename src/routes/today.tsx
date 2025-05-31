@@ -6,7 +6,7 @@ export const Route = createFileRoute('/today')({
 
 function RouteComponent() {
   return (
-    <div className="flex flex-1 flex-col overflow-x-auto bg-green-300 p-2 pb-24">
+    <div className="flex flex-1 flex-col overflow-x-auto p-2 pb-24">
       <h2>Hello "/today"!</h2>
     </div>
   )
