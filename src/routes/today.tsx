@@ -2,21 +2,41 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { FaChevronDown, FaPlus, FaRegCheckCircle } from 'react-icons/fa'
 import TextareaAutosize from 'react-textarea-autosize'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import type { FormEvent } from 'react'
+import { useTRPC } from '@/integrations/trpc/react'
 
 export const Route = createFileRoute('/today')({
   component: RouteComponent,
+  // loader: async ({ context }) => {
+  //   await context.queryClient.fetchQuery(
+  //     context.trpc.task.readAll.queryOptions(),
+  //   )
+  // },
 })
 
 function RouteComponent() {
+  const trpc = useTRPC()
+  const { data: tasks } = useQuery(trpc.task.readAll.queryOptions())
+  const { mutate: createTask } = useMutation(trpc.task.create.mutationOptions())
   return (
     <div className="flex flex-1 flex-col overflow-x-auto p-2 pb-24">
       <div className="mx-6 my-10">
         <h2>Today</h2>
         <span className="flex items-center gap-2 text-sm font-thin">
-          <FaRegCheckCircle />4 tasks
+          <FaRegCheckCircle />
+          {tasks?.length ?? 0} tasks
         </span>
       </div>
+
+      <button
+        onClick={() =>
+          createTask({ name: 'test', position: 0, description: 'test' })
+        }>
+        Create task
+      </button>
+
+      {/* {tasks.} */}
       <Section />
       <Section />
       <Section />

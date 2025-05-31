@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '../init'
 
-export const TaskRouter = createTRPCRouter({
+export const taskRouter = createTRPCRouter({
   create: publicProcedure
     .input(
       z.object({
@@ -11,19 +11,21 @@ export const TaskRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      ctx.
-      const result = await ctx.prisma.task.create({
+      const result = await ctx.db.task.create({
         data: {
-          text: input.text,
+          name: input.name,
           description: input.description,
-          position: input.position,
-          bucketId: input.bucketId,
-          userId: ctx.session.user.id,
+
+          // position: input.position,
         },
       })
 
       return result
     }),
+  readAll: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.db.task.findMany({})
+  }),
+
   // readOne: protectedProcedure
   //   .input(
   //     z.object({

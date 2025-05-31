@@ -6,5 +6,6 @@ dist-ssr
 .output
 .vinxi
 
-/generated/prisma
+/src/db/generated/prisma
 .env
+

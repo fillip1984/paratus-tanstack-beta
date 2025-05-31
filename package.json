@@ -13,7 +13,8 @@
     "check": "prettier --write . && eslint --fix",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
