@@ -1,6 +1,6 @@
 import {
-  Outlet,
   HeadContent,
+  Outlet,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
@@ -16,6 +16,7 @@ import type { QueryClient } from '@tanstack/react-query'
 
 import type { TRPCRouter } from '@/integrations/trpc/router'
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query'
+import SideNav from '@/components/SideNav.tsx'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -47,12 +48,16 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
   component: () => (
     <RootDocument>
-      <Header />
+      <div className="bg-background flex h-screen overflow-hidden text-white">
+        <SideNav />
 
-      <Outlet />
-      <TanStackRouterDevtools />
+        <div className="flex flex-1">
+          <Outlet />
+          <TanStackRouterDevtools />
 
-      <TanStackQueryLayout />
+          <TanStackQueryLayout />
+        </div>
+      </div>
     </RootDocument>
   ),
 })

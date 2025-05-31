@@ -1,15 +1,40 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@layer base {
+  h1 {
+    @apply mb-4 text-6xl font-bold;
+  }
+  h2 {
+    @apply mb-3 text-4xl font-bold;
+  }
+  h3 {
+    @apply mb-2 text-2xl font-bold;
+  }
+  h4 {
+    @apply mb-1 text-lg font-bold;
+  }
+}
+
+@theme {
+  --color-background: #282c34;
+  --color-foreground: #0b111b;
+  /* https://coolors.co/485696-e7e7e7-f9c784-fc7a1e-f24c00 */
+  --color-primary: #f24c00;
+  --color-secondary: #fc7a1e;
+  --color-accent1: #485696;
+  --color-accent2: #e7e7e7;
+}
 
 body {
   @apply m-0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
