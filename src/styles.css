@@ -1,6 +1,13 @@
 @import 'tailwindcss';
+/* @import 'tailwindcss-forms'; */
+/* @plugin '@tailwindcss/forms'; */
 
 @layer base {
+  /* Removes focus border: https://stackoverflow.com/questions/1457849/how-to-remove-the-border-highlight-on-an-input-text-element */
+  *:focus {
+    outline: none;
+  }
+
   h1 {
     @apply mb-4 text-6xl font-bold;
   }
@@ -13,11 +20,23 @@
   h4 {
     @apply mb-1 text-lg font-bold;
   }
+
+  button:enabled {
+    @apply cursor-pointer;
+  }
+
+  button:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  textarea {
+    @apply resize-none;
+  }
 }
 
 @theme {
-  --color-background: #282c34;
-  --color-foreground: #0b111b;
+  --color-background: #0b111b;
+  --color-foreground: #282c34;
   /* https://coolors.co/485696-e7e7e7-f9c784-fc7a1e-f24c00 */
   --color-primary: #f24c00;
   --color-secondary: #fc7a1e;
