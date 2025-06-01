@@ -1,8 +1,8 @@
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { FaChevronDown, FaPlus, FaRegCheckCircle } from 'react-icons/fa'
 import TextareaAutosize from 'react-textarea-autosize'
-import { useMutation, useQuery } from '@tanstack/react-query'
 import type { FormEvent } from 'react'
 import { useTRPC } from '@/integrations/trpc/react'
 
@@ -25,7 +25,7 @@ function RouteComponent() {
         <h2>Today</h2>
         <span className="flex items-center gap-2 text-sm font-thin">
           <FaRegCheckCircle />
-          {tasks?.length ?? 0} tasks
+          {tasks?.length ?? 10} tasks
         </span>
       </div>
 
