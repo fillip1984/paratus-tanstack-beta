@@ -1,6 +1,9 @@
 // import { TRPCError } from '@trpc/server'
 import { createTRPCRouter } from './init'
-import { peopleRouter } from './routers/people'
+import { checklistItemRouter } from './routers/checklistItem'
+import { collectionRouter } from './routers/collection'
+import { commentRouter } from './routers/comment'
+import { sectionRouter } from './routers/section'
 import { taskRouter } from './routers/task'
 
 /**
@@ -9,7 +12,10 @@ import { taskRouter } from './routers/task'
  * All routers added in /trpc/routers should be manually added here.
  */
 export const trpcRouter = createTRPCRouter({
-  people: peopleRouter,
+  collection: collectionRouter,
+  section: sectionRouter,
   task: taskRouter,
+  checklistItem: checklistItemRouter,
+  comment: commentRouter,
 })
 export type TRPCRouter = typeof trpcRouter

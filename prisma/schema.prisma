@@ -1,12 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // output   = "../src/db/generated/prisma/client"
 }
 
 datasource db {
@@ -14,14 +10,87 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Task {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  completed   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Collection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // @@index([completed])
-  // @@map("tasks")
+  name String
+
+  parent   Collection?  @relation("CollectionRelations", fields: [parentId], references: [id])
+  parentId String?
+  children Collection[] @relation("CollectionRelations")
+
+  sections Section[]
+}
+
+model Section {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name     String
+  position Int
+
+  tasks Task[]
+
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  text        String
+  description String?
+  complete    Boolean         @default(false)
+  position    Int
+  dueDate     DateTime?
+  priority    PriorityOption?
+
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId String
+
+  comments Comment[]
+
+  checklistItems ChecklistItem[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  text   String
+  posted DateTime
+
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String
+}
+
+model ChecklistItem {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  text     String
+  complete Boolean @default(false)
+  position Int
+
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String
+}
+
+enum PriorityOption {
+  LOWEST
+  LOW
+  MEDIUM
+  HIGH
+  HIGHEST
+  // variation 2
+  URGENT
+  IMPORTANT
+  URGENT_AND_IMPORTANT
 }

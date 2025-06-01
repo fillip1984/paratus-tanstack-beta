@@ -1,0 +1,354 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
+import {
+  FaChevronDown,
+  FaPlus,
+  FaRegCheckCircle,
+  FaTrash,
+} from 'react-icons/fa'
+import { FaChevronUp, FaEllipsis, FaX } from 'react-icons/fa6'
+import TextareaAutosize from 'react-textarea-autosize'
+import type { FormEvent } from 'react'
+import type {
+  CollectionDetailType,
+  SectionDetailType,
+  TaskType,
+} from '@/integrations/trpc/types'
+import { useTRPC } from '@/integrations/trpc/react'
+
+export default function CollectionView({
+  collection,
+}: {
+  collection: CollectionDetailType
+}) {
+  return (
+    <div className="container">
+      <div className="mx-6 my-10">
+        <h2>{collection.heading}</h2>
+        <span className="flex items-center gap-2 text-sm font-thin">
+          <FaRegCheckCircle />
+          {collection.taskCount} tasks
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        {collection.sections?.map((section) => (
+          <Section key={section.id} section={section} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const Section = ({ section }: { section: SectionDetailType }) => {
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
+
+  return (
+    <div className="bg-background flex gap-4">
+      <FaChevronDown />
+      <div className="flex flex-1 flex-col gap-2">
+        <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
+          {section.name}
+        </div>
+        <div>
+          {section.tasks.map((task) => (
+            <TaskRow key={task.id} task={task} />
+            // <div
+            //   key={task.id}
+            //   className="flex items-center gap-2 rounded-lg border border-white/30 bg-white/5 p-2">
+            //   <span className="text-sm">{task.text}</span>
+            // </div>
+          ))}
+        </div>
+        {section.nature !== 'overdue' && (
+          <div>
+            {isAddTaskOpen ? (
+              <AddTaskCard
+                section={section}
+                dismiss={() => setIsAddTaskOpen((prev) => !prev)}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsAddTaskOpen((prev) => !prev)}
+                className="flex items-center gap-2 font-thin">
+                <FaPlus className="text-primary" /> Add task
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const TaskRow = ({ task }: { task: TaskType }) => {
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  const { mutate: updateTask } = useMutation(
+    trpc.task.update.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: [trpc.task.today.queryKey()],
+        })
+      },
+    }),
+  )
+
+  const handleComplete = () => {
+    console.log('handling complete')
+    updateTask({ ...task, complete: true })
+  }
+
+  const handleTaskModal = () => {
+    console.log('showing task modal')
+    setIsTaskModalOpen(true)
+  }
+
+  return (
+    <div key={task.id} className="">
+      <div>
+        <hr />
+        <div className="flex gap-2 py-2">
+          <input
+            type="checkbox"
+            onClick={handleComplete}
+            className="rounded-full"
+          />
+          <button
+            onClick={handleTaskModal}
+            type="button"
+            className="flex flex-col">
+            <span className="text-xs">{task.text}</span>
+            <span>{task.description}</span>
+          </button>
+        </div>
+        <hr />
+
+        {isTaskModalOpen && (
+          <TaskModal task={task} dismiss={() => setIsTaskModalOpen(false)} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+const AddTaskCard = ({
+  section,
+  dismiss,
+}: {
+  section: SectionDetailType
+  dismiss: () => void
+}) => {
+  const [text, setText] = useState('')
+  const [description, setDescription] = useState('')
+  const [isFormValid, setIsFormValid] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+  useEffect(() => {
+    if (text.trim()) {
+      setIsFormValid(true)
+    } else {
+      setIsFormValid(false)
+    }
+  }, [text])
+
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  const { mutate: createTask } = useMutation(
+    trpc.task.create.mutationOptions({
+      onSuccess: async () => {
+        console.log('task created')
+        dismiss()
+        setText('')
+        setDescription('')
+        console.log('invalidating:', trpc.collection.inbox.queryKey())
+        await queryClient.invalidateQueries({
+          queryKey: trpc.task.today.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.inbox.queryKey(),
+        })
+      },
+    }),
+  )
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    console.log('submitting')
+    createTask({
+      text,
+      description,
+      sectionId: section.id,
+      position: section.tasks.length + 1,
+    })
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col rounded-xl border border-white/30 bg-white/5"
+      ref={formRef}>
+      <div className="flex flex-col p-2">
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Task name"
+          required
+        />
+        <TextareaAutosize
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Description"
+          className="text-xs"></TextareaAutosize>
+      </div>
+      <div className="flex justify-end gap-2 border border-x-0 border-b-0 border-t-white/30 p-2">
+        <button
+          type="button"
+          onClick={dismiss}
+          className="border-secondary text-secondary rounded border px-2 py-1 opacity-80 hover:opacity-100">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={!isFormValid}
+          className="bg-primary rounded px-2 py-1">
+          Add
+        </button>
+      </div>
+    </form>
+  )
+}
+
+const TaskModal = ({
+  task,
+  dismiss,
+}: {
+  task: TaskType
+  dismiss: () => void
+}) => {
+  const [text, setText] = useState('')
+  const [description, setDescription] = useState('')
+
+  useEffect(() => {
+    setText(task.text)
+    setDescription(task.description ?? '')
+  }, [task])
+
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  const { mutate: deleteTask } = useMutation(
+    trpc.task.delete.mutationOptions({
+      onSuccess: async () => {
+        console.log('task deleted')
+        dismiss()
+        await queryClient.invalidateQueries({
+          queryKey: trpc.task.today.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.inbox.queryKey(),
+        })
+      },
+    }),
+  )
+  const { mutate: updateTask } = useMutation({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [
+          trpc.task.today.queryKey(),
+          trpc.collection.readAll.queryKey(),
+          trpc.collection.readAll.queryKey(),
+        ],
+      })
+    },
+  })
+  const handleSaveTask = (e: FormEvent) => {
+    console.log('adding task')
+    e.preventDefault()
+    // updateTask({
+    //   text,
+    //   description,
+    //   complete: false,
+    // });
+  }
+
+  return (
+    <div className="absolute inset-0 z-[1000] flex h-screen w-screen items-center justify-center">
+      {/* backdrop */}
+      <div
+        onClick={dismiss}
+        className="absolute inset-0 z-[1000] h-screen w-screen bg-black/50"></div>
+
+      {/* modal content */}
+      <div className="z-[1001] mx-5 flex h-4/5 w-full flex-col rounded-xl bg-stone-900">
+        {/* header */}
+        <div className="flex items-center justify-between p-2">
+          {/* leading */}
+          <div>
+            <span>List name</span>
+          </div>
+
+          {/* trailing */}
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <FaChevronUp />
+              <FaChevronDown />
+            </span>
+            <span>
+              <FaEllipsis />
+            </span>
+            <span
+              className="cursor-pointer rounded-full bg-red-500 p-1 text-white"
+              onClick={() => deleteTask({ id: task.id })}>
+              <FaTrash />
+            </span>
+            <span>
+              <FaX />
+            </span>
+          </div>
+        </div>
+
+        {/* main content */}
+        <div className="grid h-full grid-cols-3 border-t">
+          {/* main */}
+          <div className="col-span-2 p-2">
+            <form onSubmit={handleSaveTask}>
+              <input
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Task..."
+              />
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Description..."
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  className="rounded border border-white px-4 py-2">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded bg-orange-400 px-4 py-2">
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+          {/* aside */}
+          <aside className="rounded-br-xl bg-stone-800 p-2">Side</aside>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -5,8 +5,10 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import appCss from '../styles.css?url'
 
+import TanStackQueryLayout from '../integrations/tanstack-query/layout.tsx'
 import type { QueryClient } from '@tanstack/react-query'
 
 import type { TRPCRouter } from '@/integrations/trpc/router'
@@ -48,9 +50,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
         <div className="flex flex-1">
           <Outlet />
-          {/* <TanStackRouterDevtools /> */}
+          <TanStackRouterDevtools />
 
-          {/* <TanStackQueryLayout /> */}
+          <TanStackQueryLayout />
         </div>
       </div>
     </RootDocument>

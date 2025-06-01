@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as TodayImport } from './routes/today'
+import { Route as InboxImport } from './routes/inbox'
 import { Route as IndexImport } from './routes/index'
 import { Route as DemoTanstackQueryImport } from './routes/demo.tanstack-query'
 import { Route as DemoStartServerFuncsImport } from './routes/demo.start.server-funcs'
@@ -22,6 +23,12 @@ import { Route as DemoStartApiRequestImport } from './routes/demo.start.api-requ
 const TodayRoute = TodayImport.update({
   id: '/today',
   path: '/today',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const InboxRoute = InboxImport.update({
+  id: '/inbox',
+  path: '/inbox',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,6 +67,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/inbox': {
+      id: '/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof InboxImport
+      parentRoute: typeof rootRoute
+    }
     '/today': {
       id: '/today'
       path: '/today'
@@ -95,6 +109,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/inbox': typeof InboxRoute
   '/today': typeof TodayRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
@@ -103,6 +118,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/inbox': typeof InboxRoute
   '/today': typeof TodayRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
@@ -112,6 +128,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/inbox': typeof InboxRoute
   '/today': typeof TodayRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
@@ -122,6 +139,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/inbox'
     | '/today'
     | '/demo/tanstack-query'
     | '/demo/start/api-request'
@@ -129,6 +147,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/inbox'
     | '/today'
     | '/demo/tanstack-query'
     | '/demo/start/api-request'
@@ -136,6 +155,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/inbox'
     | '/today'
     | '/demo/tanstack-query'
     | '/demo/start/api-request'
@@ -145,6 +165,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  InboxRoute: typeof InboxRoute
   TodayRoute: typeof TodayRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
@@ -153,6 +174,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  InboxRoute: InboxRoute,
   TodayRoute: TodayRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
@@ -170,6 +192,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/inbox",
         "/today",
         "/demo/tanstack-query",
         "/demo/start/api-request",
@@ -178,6 +201,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/inbox": {
+      "filePath": "inbox.tsx"
     },
     "/today": {
       "filePath": "today.tsx"
