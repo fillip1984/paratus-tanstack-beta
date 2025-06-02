@@ -1,13 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import {
+  FaAngleDown,
   FaChevronDown,
   FaPlus,
   FaRegCheckCircle,
   FaTrash,
 } from 'react-icons/fa'
 import { FaChevronUp, FaEllipsis, FaX } from 'react-icons/fa6'
+import { RxSection } from 'react-icons/rx'
 import TextareaAutosize from 'react-textarea-autosize'
+import PopupMenu from './popupMenu'
 import type { FormEvent } from 'react'
 import type {
   CollectionDetailType,
@@ -21,6 +24,27 @@ export default function CollectionView({
 }: {
   collection: CollectionDetailType
 }) {
+  const [isAddSectionOpen, setIsAddSectionOpen] = useState(false)
+  const [sectionName, setSectionName] = useState('')
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  const { mutate: createSection } = useMutation(
+    trpc.section.create.mutationOptions({
+      onSuccess: async () => {
+        console.log('section created')
+        setIsAddSectionOpen(false)
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readOne.queryKey({
+            id: collection.id,
+          }),
+        })
+      },
+    }),
+  )
+
   return (
     <div className="container">
       <div className="mx-6 my-10">
@@ -36,6 +60,41 @@ export default function CollectionView({
           <Section key={section.id} section={section} />
         ))}
       </div>
+      {!isAddSectionOpen ? (
+        <button
+          onClick={() => setIsAddSectionOpen((prev) => !prev)}
+          className="flex items-center gap-2 p-2">
+          <RxSection className="text-primary" />
+          <span className="">Add section</span>
+        </button>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <input
+            type="text"
+            value={sectionName}
+            onChange={(e) => setSectionName(e.target.value)}
+            className="rounded border p-1"
+            placeholder="Name of section..."
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsAddSectionOpen((prev) => !prev)}
+              className="button-secondary">
+              Cancel
+            </button>
+            <button
+              onClick={() =>
+                createSection({
+                  collectionId: collection.id,
+                  name: sectionName,
+                })
+              }
+              className="button-primary">
+              Add
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -63,10 +122,7 @@ const Section = ({ section }: { section: SectionDetailType }) => {
         {section.nature !== 'overdue' && (
           <div>
             {isAddTaskOpen ? (
-              <AddTaskCard
-                section={section}
-                dismiss={() => setIsAddTaskOpen((prev) => !prev)}
-              />
+              <AddTaskCard dismiss={() => setIsAddTaskOpen((prev) => !prev)} />
             ) : (
               <button
                 type="button"
@@ -135,10 +191,10 @@ const TaskRow = ({ task }: { task: TaskType }) => {
 }
 
 const AddTaskCard = ({
-  section,
+  // section,
   dismiss,
 }: {
-  section: SectionDetailType
+  // section: SectionDetailType
   dismiss: () => void
 }) => {
   const [text, setText] = useState('')
@@ -155,6 +211,13 @@ const AddTaskCard = ({
 
   const trpc = useTRPC()
   const queryClient = useQueryClient()
+  const { data: collections } = useQuery(trpc.collection.readAll.queryOptions())
+  const [selectedCollectionAndSection, setSelectedCollectionAndSection] =
+    useState<{
+      label: string
+      collectionId: string
+      sectionId: string
+    }>({ collectionId: 'unknown', sectionId: 'unknown', label: 'Inbox' })
   const { mutate: createTask } = useMutation(
     trpc.task.create.mutationOptions({
       onSuccess: async () => {
@@ -162,12 +225,17 @@ const AddTaskCard = ({
         dismiss()
         setText('')
         setDescription('')
-        console.log('invalidating:', trpc.collection.inbox.queryKey())
+        // TODO: figure out invalidation strategy
         await queryClient.invalidateQueries({
           queryKey: trpc.task.today.queryKey(),
         })
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readOne.queryKey({
+            id: selectedCollectionAndSection.collectionId,
+          }),
         })
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.inbox.queryKey(),
@@ -182,8 +250,7 @@ const AddTaskCard = ({
     createTask({
       text,
       description,
-      sectionId: section.id,
-      position: section.tasks.length + 1,
+      sectionId: selectedCollectionAndSection.sectionId,
     })
   }
 
@@ -194,6 +261,7 @@ const AddTaskCard = ({
       ref={formRef}>
       <div className="flex flex-col p-2">
         <input
+          type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Task name"
@@ -203,21 +271,70 @@ const AddTaskCard = ({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description"
-          className="text-xs"></TextareaAutosize>
+          className="m-0 border-0 bg-inherit p-0 text-xs"></TextareaAutosize>
       </div>
-      <div className="flex justify-end gap-2 border border-x-0 border-b-0 border-t-white/30 p-2">
-        <button
-          type="button"
-          onClick={dismiss}
-          className="border-secondary text-secondary rounded border px-2 py-1 opacity-80 hover:opacity-100">
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={!isFormValid}
-          className="bg-primary rounded px-2 py-1">
-          Add
-        </button>
+      <div className="flex justify-between gap-2 border border-x-0 border-b-0 border-t-white/30 p-2">
+        <PopupMenu
+          button={
+            <button className="bg-accent1 flex items-center gap-2 rounded px-2 py-1 text-xs">
+              {selectedCollectionAndSection.label} <FaAngleDown />
+            </button>
+          }
+          content={
+            <div className="flex-col">
+              <input type="search" className="rounded border" />
+              {collections?.map((collection) => (
+                <div key={collection.id} className="flex flex-col gap-1 p-1">
+                  <div>
+                    {collection.sections.map((section) => (
+                      <div key={collection.id} className="w-full">
+                        {section.name === 'Uncategorized' ? (
+                          <button
+                            onClick={() =>
+                              setSelectedCollectionAndSection({
+                                collectionId: collection.id,
+                                sectionId: section.id,
+                                label: collection.name,
+                              })
+                            }
+                            className="hover:bg-accent1/50 flex w-full rounded px-2 py-1 text-xs">
+                            {collection.name}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedCollectionAndSection({
+                                collectionId: collection.id,
+                                sectionId: section.id,
+                                label: collection.name,
+                              })
+                            }
+                            className="hover:bg-accent1/50 flex w-full rounded px-2 py-1 text-xs">
+                            {section.name}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          }></PopupMenu>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={dismiss}
+            className="border-secondary text-secondary rounded border px-2 py-1 opacity-80 hover:opacity-100">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={!isFormValid}
+            className="bg-primary rounded px-2 py-1">
+            Add
+          </button>
+        </div>
       </div>
     </form>
   )

@@ -36,7 +36,7 @@ export default function PopupMenu({
       {isOpen && (
         <>
           <div
-            className="absolute right-0 z-[1000] rounded-lg bg-stone-800 p-2"
+            className="absolute left-0 z-[1000] rounded-lg bg-stone-800 p-2"
             onClick={() => setIsOpen(false)}>
             {content}
           </div>

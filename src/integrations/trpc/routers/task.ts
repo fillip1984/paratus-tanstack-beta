@@ -43,17 +43,24 @@ export const taskRouter = createTRPCRouter({
       z.object({
         text: z.string().min(1),
         description: z.string().nullish(),
-        position: z.number(),
         sectionId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const section = await ctx.db.section.findFirst({
+        where: { id: input.sectionId },
+        include: {
+          _count: {
+            select: { tasks: true },
+          },
+        },
+      })
       return await ctx.db.task.create({
         data: {
           text: input.text,
           description: input.description,
           sectionId: input.sectionId,
-          position: input.position,
+          position: section?._count.tasks ?? 0,
         },
       })
     }),

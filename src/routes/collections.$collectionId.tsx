@@ -1,4 +1,7 @@
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { useTRPC } from '@/integrations/trpc/react'
+import CollectionView from '@/components/CollectionView'
 
 export const Route = createFileRoute('/collections/$collectionId')({
   component: RouteComponent,
@@ -6,5 +9,22 @@ export const Route = createFileRoute('/collections/$collectionId')({
 
 function RouteComponent() {
   const { collectionId } = Route.useParams()
-  return <div>Hello "/collections"! {collectionId}</div>
+  const trpc = useTRPC()
+  const { data: collection, isFetching } = useQuery(
+    trpc.collection.readOne.queryOptions({
+      id: collectionId,
+    }),
+  )
+
+  return isFetching ? (
+    <div>Loading...</div>
+  ) : (
+    <CollectionView
+      collection={{
+        ...collection,
+        heading: collection?.name ?? 'Loading',
+        taskCount: 0,
+      }}
+    />
+  )
 }

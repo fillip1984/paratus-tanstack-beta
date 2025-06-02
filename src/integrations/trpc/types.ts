@@ -1,4 +1,5 @@
 export type CollectionDetailType = {
+  id: string
   heading: string
   taskCount: number
   sections?: Array<SectionDetailType>

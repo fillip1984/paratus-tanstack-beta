@@ -37,15 +37,22 @@ export const sectionRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1),
-        position: z.number(),
         collectionId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const sections = await ctx.db.collection.findFirst({
+        where: { id: input.collectionId },
+        select: {
+          _count: {
+            select: { sections: true },
+          },
+        },
+      })
       return await ctx.db.section.create({
         data: {
           name: input.name,
-          position: input.position,
+          position: sections?._count.sections ?? 0,
           collectionId: input.collectionId,
         },
       })
