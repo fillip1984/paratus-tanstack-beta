@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   FaAngleDown,
   FaChevronDown,
+  FaInbox,
   FaPlus,
   FaRegCheckCircle,
   FaTrash,
@@ -57,7 +58,11 @@ export default function CollectionView({
 
       <div className="flex flex-col gap-6">
         {collection.sections?.map((section) => (
-          <Section key={section.id} section={section} />
+          <Section
+            key={section.id}
+            section={section}
+            currentCollectionId={collection.id}
+          />
         ))}
       </div>
       {!isAddSectionOpen ? (
@@ -99,16 +104,24 @@ export default function CollectionView({
   )
 }
 
-const Section = ({ section }: { section: SectionDetailType }) => {
+const Section = ({
+  section,
+  currentCollectionId,
+}: {
+  section: SectionDetailType
+  currentCollectionId: string
+}) => {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
 
   return (
     <div className="bg-background flex gap-4">
       <FaChevronDown />
       <div className="flex flex-1 flex-col gap-2">
-        <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
-          {section.name}
-        </div>
+        {section.name !== 'Uncategorized' && (
+          <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
+            {section.name}
+          </div>
+        )}
         <div>
           {section.tasks.map((task) => (
             <TaskRow key={task.id} task={task} />
@@ -122,7 +135,11 @@ const Section = ({ section }: { section: SectionDetailType }) => {
         {section.nature !== 'overdue' && (
           <div>
             {isAddTaskOpen ? (
-              <AddTaskCard dismiss={() => setIsAddTaskOpen((prev) => !prev)} />
+              <AddTaskCard
+                currentCollectionId={currentCollectionId}
+                currentSectionId={section.id}
+                dismiss={() => setIsAddTaskOpen((prev) => !prev)}
+              />
             ) : (
               <button
                 type="button"
@@ -163,14 +180,13 @@ const TaskRow = ({ task }: { task: TaskType }) => {
   }
 
   return (
-    <div key={task.id} className="">
+    <div key={task.id} className="border-b-1 border-b-white/30 py-2">
       <div>
-        <hr />
-        <div className="flex gap-2 py-2">
+        <div className="flex gap-2">
           <input
             type="checkbox"
             onClick={handleComplete}
-            className="rounded-full"
+            className="rounded-full bg-inherit"
           />
           <button
             onClick={handleTaskModal}
@@ -180,7 +196,6 @@ const TaskRow = ({ task }: { task: TaskType }) => {
             <span>{task.description}</span>
           </button>
         </div>
-        <hr />
 
         {isTaskModalOpen && (
           <TaskModal task={task} dismiss={() => setIsTaskModalOpen(false)} />
@@ -191,10 +206,12 @@ const TaskRow = ({ task }: { task: TaskType }) => {
 }
 
 const AddTaskCard = ({
-  // section,
+  currentCollectionId,
+  currentSectionId,
   dismiss,
 }: {
-  // section: SectionDetailType
+  currentCollectionId: string
+  currentSectionId: string
   dismiss: () => void
 }) => {
   const [text, setText] = useState('')
@@ -211,13 +228,8 @@ const AddTaskCard = ({
 
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const { data: collections } = useQuery(trpc.collection.readAll.queryOptions())
   const [selectedCollectionAndSection, setSelectedCollectionAndSection] =
-    useState<{
-      label: string
-      collectionId: string
-      sectionId: string
-    }>({ collectionId: 'unknown', sectionId: 'unknown', label: 'Inbox' })
+    useState<CollectionAndSectionType | null>(null)
   const { mutate: createTask } = useMutation(
     trpc.task.create.mutationOptions({
       onSuccess: async () => {
@@ -232,11 +244,13 @@ const AddTaskCard = ({
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.readAll.queryKey(),
         })
-        await queryClient.invalidateQueries({
-          queryKey: trpc.collection.readOne.queryKey({
-            id: selectedCollectionAndSection.collectionId,
-          }),
-        })
+        if (selectedCollectionAndSection) {
+          await queryClient.invalidateQueries({
+            queryKey: trpc.collection.readOne.queryKey({
+              id: selectedCollectionAndSection.collectionId,
+            }),
+          })
+        }
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.inbox.queryKey(),
         })
@@ -247,6 +261,10 @@ const AddTaskCard = ({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     console.log('submitting')
+    if (!selectedCollectionAndSection) {
+      console.error('No collection and section selected')
+      return
+    }
     createTask({
       text,
       description,
@@ -274,53 +292,12 @@ const AddTaskCard = ({
           className="m-0 border-0 bg-inherit p-0 text-xs"></TextareaAutosize>
       </div>
       <div className="flex justify-between gap-2 border border-x-0 border-b-0 border-t-white/30 p-2">
-        <PopupMenu
-          button={
-            <button className="bg-accent1 flex items-center gap-2 rounded px-2 py-1 text-xs">
-              {selectedCollectionAndSection.label} <FaAngleDown />
-            </button>
-          }
-          content={
-            <div className="flex-col">
-              <input type="search" className="rounded border" />
-              {collections?.map((collection) => (
-                <div key={collection.id} className="flex flex-col gap-1 p-1">
-                  <div>
-                    {collection.sections.map((section) => (
-                      <div key={collection.id} className="w-full">
-                        {section.name === 'Uncategorized' ? (
-                          <button
-                            onClick={() =>
-                              setSelectedCollectionAndSection({
-                                collectionId: collection.id,
-                                sectionId: section.id,
-                                label: collection.name,
-                              })
-                            }
-                            className="hover:bg-accent1/50 flex w-full rounded px-2 py-1 text-xs">
-                            {collection.name}
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setSelectedCollectionAndSection({
-                                collectionId: collection.id,
-                                sectionId: section.id,
-                                label: collection.name,
-                              })
-                            }
-                            className="hover:bg-accent1/50 flex w-full rounded px-2 py-1 text-xs">
-                            {section.name}
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          }></PopupMenu>
+        <CollectionSectionPicker
+          currentCollectionId={currentCollectionId}
+          currentSectionId={currentSectionId}
+          selectedCollectionAndSection={selectedCollectionAndSection}
+          setSelectedCollectionAndSection={setSelectedCollectionAndSection}
+        />
         <div className="flex gap-2">
           <button
             type="button"
@@ -337,6 +314,160 @@ const AddTaskCard = ({
         </div>
       </div>
     </form>
+  )
+}
+
+type CollectionAndSectionType = {
+  label: React.ReactNode
+  collectionId: string
+  sectionId: string
+}
+const CollectionSectionPicker = ({
+  currentCollectionId,
+  currentSectionId,
+  selectedCollectionAndSection,
+  setSelectedCollectionAndSection,
+}: {
+  currentCollectionId: string
+  currentSectionId: string
+  selectedCollectionAndSection: CollectionAndSectionType | null
+  setSelectedCollectionAndSection: React.Dispatch<
+    React.SetStateAction<CollectionAndSectionType | null>
+  >
+}) => {
+  const [inbox, setInbox] = useState<CollectionAndSectionType | null>(null)
+  const trpc = useTRPC()
+  const { data: collections } = useQuery(trpc.collection.readAll.queryOptions())
+  useEffect(() => {
+    console.log('collections', collections)
+    const inboxCollection = collections?.find((c) => c.name === 'Inbox')
+    if (!inboxCollection) {
+      throw new Error('Inbox collection not found')
+    }
+    const uncategorizedSection = inboxCollection.sections.find(
+      (s) => s.name === 'Uncategorized',
+    )
+    if (!uncategorizedSection) {
+      throw new Error('Uncategorized section not found in Inbox collection')
+    }
+    setInbox({
+      label: (
+        <span className="flex items-center gap-2">
+          <FaInbox /> Inbox
+        </span>
+      ),
+      collectionId: inboxCollection.id,
+      sectionId: uncategorizedSection.id,
+    } as CollectionAndSectionType)
+  }, [collections])
+  useEffect(() => {
+    console.log('attempting to default collection and section picker')
+    const defaultCollection = collections?.find(
+      (c) => c.id === currentCollectionId,
+    )
+    console.log(`default collection: ${defaultCollection?.name}`)
+    if (defaultCollection && defaultCollection.name !== 'Inbox') {
+      const uncategorizedSection = defaultCollection.sections.find(
+        (s) => s.id === currentSectionId,
+      )
+      if (uncategorizedSection) {
+        console.log(`defaulting to collection: ${defaultCollection.name}`)
+        setSelectedCollectionAndSection({
+          label: (
+            <span className="flex items-center gap-2">
+              # {defaultCollection.name} / <RxSection />{' '}
+              {uncategorizedSection.name}
+            </span>
+          ),
+          collectionId: defaultCollection.id,
+          sectionId: uncategorizedSection.id,
+        } as CollectionAndSectionType)
+      } else {
+        console.log(`unable to find current section: ${currentSectionId}`)
+      }
+    } else {
+      console.log('defaulting to inbox')
+      if (!inbox) {
+        console.warn(
+          'Inbox not found, defaulting to Inbox collection and Uncategorized section',
+        )
+        return
+        // throw new Error('Uncategorized section not found in default collection')
+      }
+      setSelectedCollectionAndSection({
+        label: inbox.label,
+        collectionId: inbox.collectionId,
+        sectionId: inbox.sectionId,
+      })
+    }
+  }, [inbox, collections])
+
+  return (
+    <PopupMenu
+      button={
+        <button
+          type="button"
+          className="bg-accent1 flex items-center gap-2 rounded px-2 py-1 text-xs">
+          {selectedCollectionAndSection?.label} <FaAngleDown />
+        </button>
+      }
+      content={
+        <div className="flex-col">
+          <input type="search" className="rounded border" />
+          {inbox && (
+            <button
+              type="button"
+              onClick={() => setSelectedCollectionAndSection(inbox)}
+              className="hover:bg-accent1/50 flex w-full items-center gap-2 rounded px-2 py-1 text-xs">
+              {inbox.label}
+            </button>
+          )}
+          <span>Collections</span>
+          {collections
+            ?.filter((c) => c.name !== 'Inbox')
+            .map((collection) => (
+              <div key={collection.id} className="flex flex-col gap-1 p-1">
+                {collection.sections.map((section, i) => (
+                  <div key={`${collection.id}-${i}`} className="w-full">
+                    {section.name === 'Uncategorized' ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedCollectionAndSection({
+                            collectionId: collection.id,
+                            sectionId: section.id,
+                            label: `# ${collection.name}`,
+                          })
+                        }
+                        className="hover:bg-accent1/50 flex w-full rounded px-2 py-1 text-xs">
+                        # {collection.name}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedCollectionAndSection({
+                            collectionId: collection.id,
+                            sectionId: section.id,
+                            label: (
+                              <span className="flex items-center gap-2">
+                                # {collection.name} / <RxSection />
+                                {section.name}
+                              </span>
+                            ),
+                          })
+                        }
+                        className="hover:bg-accent1/50 ml-2 flex w-full items-center gap-2 rounded px-2 py-1 text-xs">
+                        <RxSection />
+                        {section.name}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+        </div>
+      }></PopupMenu>
   )
 }
 

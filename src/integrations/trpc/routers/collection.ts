@@ -90,6 +90,14 @@ export const collectionRouter = createTRPCRouter({
       return await ctx.db.collection.create({
         data: {
           name: input.name,
+          sections: {
+            create: [
+              {
+                name: 'Uncategorized',
+                position: 0,
+              },
+            ],
+          },
         },
       })
     }),
