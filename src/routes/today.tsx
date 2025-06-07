@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { isPast, isSameDay } from 'date-fns'
 import type {
   CollectionDetailType,
   SectionDetailType,
@@ -24,10 +25,7 @@ function RouteComponent() {
     name: 'Overdue',
     position: 0,
     nature: 'overdue',
-    tasks:
-      tasks?.filter(
-        (task) => task.dueDate && new Date(task.dueDate) < new Date(),
-      ) ?? [],
+    tasks: tasks?.filter((task) => task.dueDate && isPast(task.dueDate)) ?? [],
   }
   const todaySection: SectionDetailType = {
     id: 'today',
@@ -36,9 +34,7 @@ function RouteComponent() {
     nature: 'today',
     tasks:
       tasks?.filter(
-        (task) =>
-          task.dueDate &&
-          new Date(task.dueDate).toDateString() === new Date().toDateString(),
+        (task) => task.dueDate && isSameDay(task.dueDate, new Date()),
       ) ?? [],
   }
   const today = {

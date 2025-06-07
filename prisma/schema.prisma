@@ -90,7 +90,7 @@ enum PriorityOption {
   HIGH
   HIGHEST
   // variation 2
+  URGENT_AND_IMPORTANT
   URGENT
   IMPORTANT
-  URGENT_AND_IMPORTANT
 }

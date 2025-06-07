@@ -31,13 +31,24 @@ export default function PopupMenu({
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div onClick={() => setIsOpen((prev) => !prev)}>{button}</div>
+      <div
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          setIsOpen((prev) => !prev)
+        }}>
+        {button}
+      </div>
 
       {isOpen && (
         <>
           <div
-            className="absolute left-0 z-[1000] rounded-lg bg-stone-800 p-2"
-            onClick={() => setIsOpen(false)}>
+            className="bg-foreground absolute left-0 z-[1000] rounded-lg"
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              setIsOpen(false)
+            }}>
             {content}
           </div>
         </>

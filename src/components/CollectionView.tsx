@@ -1,18 +1,17 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useRef, useState } from 'react'
-import {
-  FaAngleDown,
-  FaChevronDown,
-  FaInbox,
-  FaPlus,
-  FaRegCheckCircle,
-  FaTrash,
-} from 'react-icons/fa'
-import { FaChevronUp, FaEllipsis, FaX } from 'react-icons/fa6'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { startOfDay } from 'date-fns'
+import { useEffect, useRef, useState } from 'react'
+import { FaChevronDown, FaPlus, FaRegCheckCircle } from 'react-icons/fa'
+
 import { RxSection } from 'react-icons/rx'
 import TextareaAutosize from 'react-textarea-autosize'
-import PopupMenu from './popupMenu'
+import CollectionSectionPicker from './shared/CollectionAndSectionPicker'
+import DatePicker from './shared/DatePicker'
+import PriorityPicker from './shared/PriorityPicker'
+import TaskModal from './shared/TaskModal'
+import type { CollectionAndSectionType } from './shared/CollectionAndSectionPicker'
 import type { FormEvent } from 'react'
+import type { PriorityOption } from '@prisma/client'
 import type {
   CollectionDetailType,
   SectionDetailType,
@@ -62,6 +61,9 @@ export default function CollectionView({
             key={section.id}
             section={section}
             currentCollectionId={collection.id}
+            defaultDueDate={
+              collection.heading === 'Today' ? startOfDay(new Date()) : null
+            }
           />
         ))}
       </div>
@@ -107,9 +109,11 @@ export default function CollectionView({
 const Section = ({
   section,
   currentCollectionId,
+  defaultDueDate,
 }: {
   section: SectionDetailType
   currentCollectionId: string
+  defaultDueDate?: Date | null
 }) => {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
 
@@ -125,11 +129,6 @@ const Section = ({
         <div>
           {section.tasks.map((task) => (
             <TaskRow key={task.id} task={task} />
-            // <div
-            //   key={task.id}
-            //   className="flex items-center gap-2 rounded-lg border border-white/30 bg-white/5 p-2">
-            //   <span className="text-sm">{task.text}</span>
-            // </div>
           ))}
         </div>
         {section.nature !== 'overdue' && (
@@ -138,6 +137,7 @@ const Section = ({
               <AddTaskCard
                 currentCollectionId={currentCollectionId}
                 currentSectionId={section.id}
+                defaultDueDate={defaultDueDate ?? null}
                 dismiss={() => setIsAddTaskOpen((prev) => !prev)}
               />
             ) : (
@@ -162,8 +162,11 @@ const TaskRow = ({ task }: { task: TaskType }) => {
   const { mutate: updateTask } = useMutation(
     trpc.task.update.mutationOptions({
       onSuccess: async () => {
+        // await queryClient.invalidateQueries({
+        //   queryKey: [trpc.task.today.queryKey()],
+        // })
         await queryClient.invalidateQueries({
-          queryKey: [trpc.task.today.queryKey()],
+          queryKey: [trpc.collection.readAll.queryKey()],
         })
       },
     }),
@@ -179,6 +182,9 @@ const TaskRow = ({ task }: { task: TaskType }) => {
     setIsTaskModalOpen(true)
   }
 
+  const handleTaskDueDateChange = (dueDate: Date | null) => {
+    updateTask({ ...task, dueDate })
+  }
   return (
     <div key={task.id} className="border-b-1 border-b-white/30 py-2">
       <div>
@@ -188,13 +194,22 @@ const TaskRow = ({ task }: { task: TaskType }) => {
             onClick={handleComplete}
             className="rounded-full bg-inherit"
           />
-          <button
-            onClick={handleTaskModal}
-            type="button"
-            className="flex flex-col">
-            <span className="text-xs">{task.text}</span>
-            <span>{task.description}</span>
-          </button>
+          <div onClick={handleTaskModal} className="flex flex-col">
+            <span className="text-sm">{task.text}</span>
+            <span className="text-xs">{task.description}</span>
+            <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
+              <DatePicker
+                value={task.dueDate}
+                setValue={handleTaskDueDateChange}
+              />
+              <PriorityPicker
+                value={task.priority}
+                setValue={(priority) => {
+                  updateTask({ ...task, priority })
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {isTaskModalOpen && (
@@ -208,14 +223,18 @@ const TaskRow = ({ task }: { task: TaskType }) => {
 const AddTaskCard = ({
   currentCollectionId,
   currentSectionId,
+  defaultDueDate,
   dismiss,
 }: {
   currentCollectionId: string
   currentSectionId: string
+  defaultDueDate?: Date | null
   dismiss: () => void
 }) => {
   const [text, setText] = useState('')
   const [description, setDescription] = useState('')
+  const [dueDate, setDueDate] = useState<Date | null>(defaultDueDate ?? null)
+  const [priority, setPriority] = useState<PriorityOption | null>(null)
   const [isFormValid, setIsFormValid] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   useEffect(() => {
@@ -268,6 +287,8 @@ const AddTaskCard = ({
     createTask({
       text,
       description,
+      dueDate: dueDate,
+      priority: priority,
       sectionId: selectedCollectionAndSection.sectionId,
     })
   }
@@ -290,6 +311,22 @@ const AddTaskCard = ({
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description"
           className="m-0 border-0 bg-inherit p-0 text-xs"></TextareaAutosize>
+        <div className="flex items-center gap-2">
+          <DatePicker value={dueDate} setValue={setDueDate} />
+          <PriorityPicker value={priority} setValue={setPriority} />
+
+          {/* <button
+      type="button"
+      className="flex items-center gap-2 rounded border border-white/30 px-2 py-1 text-sm text-white/60">
+      <FaRegClock />
+      Reminders
+    </button>
+    <button
+      type="button"
+      className="flex items-center gap-2 rounded border border-white/30 px-2 py-1 text-sm text-white/60">
+      <FaEllipsis />
+    </button> */}
+        </div>
       </div>
       <div className="flex justify-between gap-2 border border-x-0 border-b-0 border-t-white/30 p-2">
         <CollectionSectionPicker
@@ -314,289 +351,5 @@ const AddTaskCard = ({
         </div>
       </div>
     </form>
-  )
-}
-
-type CollectionAndSectionType = {
-  label: React.ReactNode
-  collectionId: string
-  sectionId: string
-}
-const CollectionSectionPicker = ({
-  currentCollectionId,
-  currentSectionId,
-  selectedCollectionAndSection,
-  setSelectedCollectionAndSection,
-}: {
-  currentCollectionId: string
-  currentSectionId: string
-  selectedCollectionAndSection: CollectionAndSectionType | null
-  setSelectedCollectionAndSection: React.Dispatch<
-    React.SetStateAction<CollectionAndSectionType | null>
-  >
-}) => {
-  const [inbox, setInbox] = useState<CollectionAndSectionType | null>(null)
-  const trpc = useTRPC()
-  const { data: collections } = useQuery(trpc.collection.readAll.queryOptions())
-  useEffect(() => {
-    console.log('collections', collections)
-    const inboxCollection = collections?.find((c) => c.name === 'Inbox')
-    if (!inboxCollection) {
-      throw new Error('Inbox collection not found')
-    }
-    const uncategorizedSection = inboxCollection.sections.find(
-      (s) => s.name === 'Uncategorized',
-    )
-    if (!uncategorizedSection) {
-      throw new Error('Uncategorized section not found in Inbox collection')
-    }
-    setInbox({
-      label: (
-        <span className="flex items-center gap-2">
-          <FaInbox /> Inbox
-        </span>
-      ),
-      collectionId: inboxCollection.id,
-      sectionId: uncategorizedSection.id,
-    } as CollectionAndSectionType)
-  }, [collections])
-  useEffect(() => {
-    console.log('attempting to default collection and section picker')
-    const defaultCollection = collections?.find(
-      (c) => c.id === currentCollectionId,
-    )
-    console.log(`default collection: ${defaultCollection?.name}`)
-    if (defaultCollection && defaultCollection.name !== 'Inbox') {
-      const uncategorizedSection = defaultCollection.sections.find(
-        (s) => s.id === currentSectionId,
-      )
-      if (uncategorizedSection) {
-        console.log(`defaulting to collection: ${defaultCollection.name}`)
-        setSelectedCollectionAndSection({
-          label: (
-            <span className="flex items-center gap-2">
-              # {defaultCollection.name} / <RxSection />{' '}
-              {uncategorizedSection.name}
-            </span>
-          ),
-          collectionId: defaultCollection.id,
-          sectionId: uncategorizedSection.id,
-        } as CollectionAndSectionType)
-      } else {
-        console.log(`unable to find current section: ${currentSectionId}`)
-      }
-    } else {
-      console.log('defaulting to inbox')
-      if (!inbox) {
-        console.warn(
-          'Inbox not found, defaulting to Inbox collection and Uncategorized section',
-        )
-        return
-        // throw new Error('Uncategorized section not found in default collection')
-      }
-      setSelectedCollectionAndSection({
-        label: inbox.label,
-        collectionId: inbox.collectionId,
-        sectionId: inbox.sectionId,
-      })
-    }
-  }, [inbox, collections])
-
-  return (
-    <PopupMenu
-      button={
-        <button
-          type="button"
-          className="bg-accent1 flex items-center gap-2 rounded px-2 py-1 text-xs">
-          {selectedCollectionAndSection?.label} <FaAngleDown />
-        </button>
-      }
-      content={
-        <div className="flex-col">
-          <input type="search" className="rounded border" />
-          {inbox && (
-            <button
-              type="button"
-              onClick={() => setSelectedCollectionAndSection(inbox)}
-              className="hover:bg-accent1/50 flex w-full items-center gap-2 rounded px-2 py-1 text-xs">
-              {inbox.label}
-            </button>
-          )}
-          <span>Collections</span>
-          {collections
-            ?.filter((c) => c.name !== 'Inbox')
-            .map((collection) => (
-              <div key={collection.id} className="flex flex-col gap-1 p-1">
-                {collection.sections.map((section, i) => (
-                  <div key={`${collection.id}-${i}`} className="w-full">
-                    {section.name === 'Uncategorized' ? (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSelectedCollectionAndSection({
-                            collectionId: collection.id,
-                            sectionId: section.id,
-                            label: `# ${collection.name}`,
-                          })
-                        }
-                        className="hover:bg-accent1/50 flex w-full rounded px-2 py-1 text-xs">
-                        # {collection.name}
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSelectedCollectionAndSection({
-                            collectionId: collection.id,
-                            sectionId: section.id,
-                            label: (
-                              <span className="flex items-center gap-2">
-                                # {collection.name} / <RxSection />
-                                {section.name}
-                              </span>
-                            ),
-                          })
-                        }
-                        className="hover:bg-accent1/50 ml-2 flex w-full items-center gap-2 rounded px-2 py-1 text-xs">
-                        <RxSection />
-                        {section.name}
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ))}
-        </div>
-      }></PopupMenu>
-  )
-}
-
-const TaskModal = ({
-  task,
-  dismiss,
-}: {
-  task: TaskType
-  dismiss: () => void
-}) => {
-  const [text, setText] = useState('')
-  const [description, setDescription] = useState('')
-
-  useEffect(() => {
-    setText(task.text)
-    setDescription(task.description ?? '')
-  }, [task])
-
-  const trpc = useTRPC()
-  const queryClient = useQueryClient()
-  const { mutate: deleteTask } = useMutation(
-    trpc.task.delete.mutationOptions({
-      onSuccess: async () => {
-        console.log('task deleted')
-        dismiss()
-        await queryClient.invalidateQueries({
-          queryKey: trpc.task.today.queryKey(),
-        })
-        await queryClient.invalidateQueries({
-          queryKey: trpc.collection.readAll.queryKey(),
-        })
-        await queryClient.invalidateQueries({
-          queryKey: trpc.collection.inbox.queryKey(),
-        })
-      },
-    }),
-  )
-  const { mutate: updateTask } = useMutation({
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: [
-          trpc.task.today.queryKey(),
-          trpc.collection.readAll.queryKey(),
-          trpc.collection.readAll.queryKey(),
-        ],
-      })
-    },
-  })
-  const handleSaveTask = (e: FormEvent) => {
-    console.log('adding task')
-    e.preventDefault()
-    // updateTask({
-    //   text,
-    //   description,
-    //   complete: false,
-    // });
-  }
-
-  return (
-    <div className="absolute inset-0 z-[1000] flex h-screen w-screen items-center justify-center">
-      {/* backdrop */}
-      <div
-        onClick={dismiss}
-        className="absolute inset-0 z-[1000] h-screen w-screen bg-black/50"></div>
-
-      {/* modal content */}
-      <div className="z-[1001] mx-5 flex h-4/5 w-full flex-col rounded-xl bg-stone-900">
-        {/* header */}
-        <div className="flex items-center justify-between p-2">
-          {/* leading */}
-          <div>
-            <span>List name</span>
-          </div>
-
-          {/* trailing */}
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              <FaChevronUp />
-              <FaChevronDown />
-            </span>
-            <span>
-              <FaEllipsis />
-            </span>
-            <span
-              className="cursor-pointer rounded-full bg-red-500 p-1 text-white"
-              onClick={() => deleteTask({ id: task.id })}>
-              <FaTrash />
-            </span>
-            <span>
-              <FaX />
-            </span>
-          </div>
-        </div>
-
-        {/* main content */}
-        <div className="grid h-full grid-cols-3 border-t">
-          {/* main */}
-          <div className="col-span-2 p-2">
-            <form onSubmit={handleSaveTask}>
-              <input
-                type="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Task..."
-              />
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Description..."
-              />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={dismiss}
-                  className="rounded border border-white px-4 py-2">
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded bg-orange-400 px-4 py-2">
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-          {/* aside */}
-          <aside className="rounded-br-xl bg-stone-800 p-2">Side</aside>
-        </div>
-      </div>
-    </div>
   )
 }

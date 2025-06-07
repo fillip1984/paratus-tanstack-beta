@@ -1,3 +1,5 @@
+import type { PriorityOption } from '@prisma/client'
+
 export type CollectionDetailType = {
   id: string
   heading: string
@@ -18,7 +20,12 @@ export type TaskType = {
   id: string
   text: string
   description?: string | null
+  dueDate: Date | null
+  priority: PriorityOption | null
+  sectionId: string
+  complete: boolean
   position: number
+
   // dueDate?: Date | null;
   // completedAt?: Date | null;
   // checkcollectionItems: CheckcollectionItemType[];

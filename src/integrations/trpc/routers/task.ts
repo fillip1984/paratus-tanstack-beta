@@ -43,6 +43,8 @@ export const taskRouter = createTRPCRouter({
       z.object({
         text: z.string().min(1),
         description: z.string().nullish(),
+        dueDate: z.date().nullish(),
+        priority: z.nativeEnum(PriorityOption).nullish(),
         sectionId: z.string().min(1),
       }),
     )
@@ -59,6 +61,8 @@ export const taskRouter = createTRPCRouter({
         data: {
           text: input.text,
           description: input.description,
+          dueDate: input.dueDate,
+          priority: input.priority,
           sectionId: input.sectionId,
           position: section?._count.tasks ?? 0,
         },

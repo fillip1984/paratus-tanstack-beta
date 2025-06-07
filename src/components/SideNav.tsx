@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaSearch } from 'react-icons/fa'
 import {
   FaCalendarDay,
@@ -9,7 +9,7 @@ import {
   FaPlus,
   FaX,
 } from 'react-icons/fa6'
-import Modal from './modal'
+import Modal from './ui/modal'
 import { useTRPC } from '@/integrations/trpc/react'
 
 export default function SideNav() {

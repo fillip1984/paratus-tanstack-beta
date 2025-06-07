@@ -30,6 +30,7 @@
     "@trpc/server": "^11.0.0",
     "@trpc/tanstack-react-query": "^11.0.0",
     "@xobotyi/scrollbar-width": "^1.9.5",
+    "date-fns": "^4.1.0",
     "motion": "^12.15.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
