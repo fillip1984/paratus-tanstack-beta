@@ -10,7 +10,7 @@ import {
   startOfTomorrow,
 } from 'date-fns'
 import { useEffect, useState } from 'react'
-import { FaCalendarDay, FaSun } from 'react-icons/fa'
+import { FaCalendarAlt, FaCalendarDay, FaSun } from 'react-icons/fa'
 import { CgCalendarNext } from 'react-icons/cg'
 import { MdOutlineWeekend } from 'react-icons/md'
 import PopupMenu from '../ui/popupMenu'
@@ -58,7 +58,11 @@ export default function DatePicker({
 }) {
   const [datePickerValue, setDatePickerValue] = useState<DateType | null>(
     value
-      ? (quickDateOptions.find((d) => isEqual(d.value, value)) ?? null)
+      ? (quickDateOptions.find((d) => isEqual(d.value, value)) ?? {
+          label: format(value, 'MMM/dd/yyyy'),
+          value,
+          icon: <FaCalendarAlt />,
+        })
       : null,
   )
   useEffect(() => {

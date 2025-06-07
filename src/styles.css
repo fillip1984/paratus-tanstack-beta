@@ -82,7 +82,7 @@ body {
   } */
 
   .container {
-    @apply flex flex-1 flex-col overflow-x-auto p-2 pb-24;
+    @apply flex flex-1 flex-col overflow-x-auto pr-3 pb-24 pl-2;
   }
 
   .container-centered {

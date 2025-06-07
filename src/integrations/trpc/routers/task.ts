@@ -78,6 +78,7 @@ export const taskRouter = createTRPCRouter({
         position: z.number(),
         dueDate: z.date().nullish(),
         priority: z.nativeEnum(PriorityOption).nullish(),
+        sectionId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -92,6 +93,7 @@ export const taskRouter = createTRPCRouter({
           position: input.position,
           dueDate: input.dueDate,
           priority: input.priority,
+          sectionId: input.sectionId,
         },
       })
     }),

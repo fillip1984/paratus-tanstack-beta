@@ -5,11 +5,10 @@ import { FaChevronDown, FaPlus, FaRegCheckCircle } from 'react-icons/fa'
 
 import { RxSection } from 'react-icons/rx'
 import TextareaAutosize from 'react-textarea-autosize'
-import CollectionSectionPicker from './shared/CollectionAndSectionPicker'
+import SectionPicker from './shared/SectionPicker'
 import DatePicker from './shared/DatePicker'
 import PriorityPicker from './shared/PriorityPicker'
 import TaskModal from './shared/TaskModal'
-import type { CollectionAndSectionType } from './shared/CollectionAndSectionPicker'
 import type { FormEvent } from 'react'
 import type { PriorityOption } from '@prisma/client'
 import type {
@@ -60,7 +59,6 @@ export default function CollectionView({
           <Section
             key={section.id}
             section={section}
-            currentCollectionId={collection.id}
             defaultDueDate={
               collection.heading === 'Today' ? startOfDay(new Date()) : null
             }
@@ -108,17 +106,15 @@ export default function CollectionView({
 
 const Section = ({
   section,
-  currentCollectionId,
   defaultDueDate,
 }: {
   section: SectionDetailType
-  currentCollectionId: string
   defaultDueDate?: Date | null
 }) => {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
 
   return (
-    <div className="bg-background flex gap-4">
+    <div className="flex gap-4">
       <FaChevronDown />
       <div className="flex flex-1 flex-col gap-2">
         {section.name !== 'Uncategorized' && (
@@ -135,7 +131,6 @@ const Section = ({
           <div>
             {isAddTaskOpen ? (
               <AddTaskCard
-                currentCollectionId={currentCollectionId}
                 currentSectionId={section.id}
                 defaultDueDate={defaultDueDate ?? null}
                 dismiss={() => setIsAddTaskOpen((prev) => !prev)}
@@ -185,6 +180,10 @@ const TaskRow = ({ task }: { task: TaskType }) => {
   const handleTaskDueDateChange = (dueDate: Date | null) => {
     updateTask({ ...task, dueDate })
   }
+
+  const handleSectionChange = (sectionId: string) => {
+    updateTask({ ...task, sectionId })
+  }
   return (
     <div key={task.id} className="border-b-1 border-b-white/30 py-2">
       <div>
@@ -194,7 +193,7 @@ const TaskRow = ({ task }: { task: TaskType }) => {
             onClick={handleComplete}
             className="rounded-full bg-inherit"
           />
-          <div onClick={handleTaskModal} className="flex flex-col">
+          <div onClick={handleTaskModal} className="flex flex-1 flex-col">
             <span className="text-sm">{task.text}</span>
             <span className="text-xs">{task.description}</span>
             <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
@@ -208,6 +207,12 @@ const TaskRow = ({ task }: { task: TaskType }) => {
                   updateTask({ ...task, priority })
                 }}
               />
+              <div className="ml-auto">
+                <SectionPicker
+                  value={task.sectionId}
+                  setValue={handleSectionChange}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -221,12 +226,10 @@ const TaskRow = ({ task }: { task: TaskType }) => {
 }
 
 const AddTaskCard = ({
-  currentCollectionId,
   currentSectionId,
   defaultDueDate,
   dismiss,
 }: {
-  currentCollectionId: string
   currentSectionId: string
   defaultDueDate?: Date | null
   dismiss: () => void
@@ -247,8 +250,7 @@ const AddTaskCard = ({
 
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const [selectedCollectionAndSection, setSelectedCollectionAndSection] =
-    useState<CollectionAndSectionType | null>(null)
+  const [sectionId, setSectionId] = useState<string | null>(null)
   const { mutate: createTask } = useMutation(
     trpc.task.create.mutationOptions({
       onSuccess: async () => {
@@ -263,13 +265,13 @@ const AddTaskCard = ({
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.readAll.queryKey(),
         })
-        if (selectedCollectionAndSection) {
-          await queryClient.invalidateQueries({
-            queryKey: trpc.collection.readOne.queryKey({
-              id: selectedCollectionAndSection.collectionId,
-            }),
-          })
-        }
+        // if (selectedCollectionAndSection) {
+        //   await queryClient.invalidateQueries({
+        //     queryKey: trpc.collection.readOne.queryKey({
+        //       id: selectedCollectionAndSection.collectionId,
+        //     }),
+        //   })
+        // }
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.inbox.queryKey(),
         })
@@ -280,7 +282,7 @@ const AddTaskCard = ({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     console.log('submitting')
-    if (!selectedCollectionAndSection) {
+    if (!sectionId) {
       console.error('No collection and section selected')
       return
     }
@@ -289,7 +291,7 @@ const AddTaskCard = ({
       description,
       dueDate: dueDate,
       priority: priority,
-      sectionId: selectedCollectionAndSection.sectionId,
+      sectionId: sectionId,
     })
   }
 
@@ -329,12 +331,7 @@ const AddTaskCard = ({
         </div>
       </div>
       <div className="flex justify-between gap-2 border border-x-0 border-b-0 border-t-white/30 p-2">
-        <CollectionSectionPicker
-          currentCollectionId={currentCollectionId}
-          currentSectionId={currentSectionId}
-          selectedCollectionAndSection={selectedCollectionAndSection}
-          setSelectedCollectionAndSection={setSelectedCollectionAndSection}
-        />
+        <SectionPicker value={currentSectionId} setValue={setSectionId} />
         <div className="flex gap-2">
           <button
             type="button"
