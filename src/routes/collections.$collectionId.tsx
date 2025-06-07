@@ -16,9 +16,7 @@ function RouteComponent() {
     }),
   )
 
-  return isFetching ? (
-    <div>Loading...</div>
-  ) : (
+  return (
     <CollectionView
       collection={{
         ...collection,

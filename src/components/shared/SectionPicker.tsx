@@ -52,8 +52,11 @@ export default function SectionPicker({
     if (!collections || !inbox) return
 
     console.log('initialization and default picker', value)
-    if (!value) {
-      console.log('no suggested section given, default to inbox')
+    if (!value || value === 'today') {
+      console.log(
+        'no suitable suggested section given, default to inbox. Given suggested value:',
+        value,
+      )
       setSectionPickerValue(inbox)
       return
     }
@@ -72,6 +75,11 @@ export default function SectionPicker({
       console.error(
         "Couldn't find section so can't default section picker. This shouldn't happen!",
       )
+      return
+    }
+
+    if (collection.name === 'Inbox') {
+      setSectionPickerValue(inbox)
       return
     }
 
@@ -94,7 +102,7 @@ export default function SectionPicker({
   }, [value, collections, inbox])
   useEffect(() => {
     if (sectionPickerValue && sectionPickerValue.value !== value) {
-      console.log("only update section if there's a change in the value")
+      // console.log("only update section if there's a change in the value")
       setValue(sectionPickerValue.value)
     }
   }, [sectionPickerValue])
