@@ -58,6 +58,7 @@ export default function CollectionView({
         {collection.sections?.map((section) => (
           <Section
             key={section.id}
+            currentCollectionId={collection.id}
             section={section}
             defaultDueDate={
               collection.heading === 'Today' ? startOfDay(new Date()) : null
@@ -105,9 +106,11 @@ export default function CollectionView({
 }
 
 const Section = ({
+  currentCollectionId,
   section,
   defaultDueDate,
 }: {
+  currentCollectionId: string
   section: SectionDetailType
   defaultDueDate?: Date | null
 }) => {
@@ -131,6 +134,7 @@ const Section = ({
           <div>
             {isAddTaskOpen ? (
               <AddTaskCard
+                currentCollectionId={currentCollectionId}
                 currentSectionId={section.id}
                 defaultDueDate={defaultDueDate ?? null}
                 dismiss={() => setIsAddTaskOpen((prev) => !prev)}
@@ -226,18 +230,25 @@ const TaskRow = ({ task }: { task: TaskType }) => {
 }
 
 const AddTaskCard = ({
+  currentCollectionId,
   currentSectionId,
   defaultDueDate,
   dismiss,
 }: {
+  currentCollectionId: string
   currentSectionId: string
   defaultDueDate?: Date | null
   dismiss: () => void
 }) => {
+  // steal focus
+  useEffect(() => {
+    formRef.current?.querySelector('input')?.focus()
+  }, [])
   const [text, setText] = useState('')
   const [description, setDescription] = useState('')
   const [dueDate, setDueDate] = useState<Date | null>(defaultDueDate ?? null)
   const [priority, setPriority] = useState<PriorityOption | null>(null)
+  const [sectionId, setSectionId] = useState<string | null>(currentSectionId)
   const [isFormValid, setIsFormValid] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   useEffect(() => {
@@ -250,12 +261,11 @@ const AddTaskCard = ({
 
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const [sectionId, setSectionId] = useState<string | null>(null)
   const { mutate: createTask } = useMutation(
     trpc.task.create.mutationOptions({
       onSuccess: async () => {
         console.log('task created')
-        dismiss()
+        // dismiss()
         setText('')
         setDescription('')
         // TODO: figure out invalidation strategy
@@ -266,11 +276,11 @@ const AddTaskCard = ({
           queryKey: trpc.collection.readAll.queryKey(),
         })
         // if (selectedCollectionAndSection) {
-        //   await queryClient.invalidateQueries({
-        //     queryKey: trpc.collection.readOne.queryKey({
-        //       id: selectedCollectionAndSection.collectionId,
-        //     }),
-        //   })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readOne.queryKey({
+            id: currentCollectionId,
+          }),
+        })
         // }
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.inbox.queryKey(),
@@ -331,7 +341,7 @@ const AddTaskCard = ({
         </div>
       </div>
       <div className="flex justify-between gap-2 border border-x-0 border-b-0 border-t-white/30 p-2">
-        <SectionPicker value={currentSectionId} setValue={setSectionId} />
+        <SectionPicker value={sectionId} setValue={setSectionId} />
         <div className="flex gap-2">
           <button
             type="button"

@@ -41,17 +41,15 @@ export default function PopupMenu({
       </div>
 
       {isOpen && (
-        <>
-          <div
-            className="bg-foreground absolute left-0 z-[1000] rounded-lg"
-            onClick={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-              setIsOpen(false)
-            }}>
-            {content}
-          </div>
-        </>
+        <div
+          className="bg-foreground absolute left-0 z-[1000] rounded-lg"
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            setIsOpen(false)
+          }}>
+          {content}
+        </div>
       )}
     </div>
   )

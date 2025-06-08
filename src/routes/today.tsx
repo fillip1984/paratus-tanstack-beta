@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { isPast, isSameDay, startOfDay } from 'date-fns'
+import { isSameDay, startOfDay } from 'date-fns'
 import type {
   CollectionDetailType,
   SectionDetailType,
 } from '@/integrations/trpc/types'
-import CollectionView from '@/components/CollectionView'
 import { useTRPC } from '@/integrations/trpc/react'
+import CollectionView from '@/components/CollectionView'
 
 export const Route = createFileRoute('/today')({
   component: RouteComponent,

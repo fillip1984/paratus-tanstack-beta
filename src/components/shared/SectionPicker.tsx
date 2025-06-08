@@ -14,7 +14,7 @@ export default function SectionPicker({
   value,
   setValue,
 }: {
-  value: string
+  value: string | null
   setValue: (sectionId: string) => void
 }) {
   const [sectionPickerValue, setSectionPickerValue] =
