@@ -117,29 +117,29 @@ export const taskRouter = createTRPCRouter({
         },
       })
     }),
-  // reoder: publicProcedure
-  //   .input(
-  //     z.array(
-  //       z.object({
-  //         id: z.string().min(1),
-  //         position: z.number(),
-  //         sectionId: z.string(),
-  //       }),
-  //     ),
-  //   )
-  //   .mutation(async ({ ctx, input }) => {
-  //     await ctx.db.$transaction(async (tx) => {
-  //       for (const task of input) {
-  //         await tx.task.update({
-  //           where: {
-  //             id: task.id,
-  //           },
-  //           data: {
-  //             position: task.position,
-  //             sectionId: task.sectionId,
-  //           },
-  //         });
-  //       }
-  //     });
-  //   }),
+  reoder: publicProcedure
+    .input(
+      z.array(
+        z.object({
+          id: z.string().min(1),
+          position: z.number(),
+          sectionId: z.string(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.$transaction(async (tx) => {
+        for (const task of input) {
+          await tx.task.update({
+            where: {
+              id: task.id,
+            },
+            data: {
+              position: task.position,
+              sectionId: task.sectionId,
+            },
+          })
+        }
+      })
+    }),
 })

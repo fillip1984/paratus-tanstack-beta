@@ -3,8 +3,9 @@ import { startOfDay } from 'date-fns'
 import { useEffect, useRef, useState } from 'react'
 import { FaChevronDown, FaPlus, FaRegCheckCircle } from 'react-icons/fa'
 
-import { RxSection } from 'react-icons/rx'
+import { RxDragHandleDots2, RxSection } from 'react-icons/rx'
 import TextareaAutosize from 'react-textarea-autosize'
+import { useDragAndDrop } from '@formkit/drag-and-drop/react'
 import SectionPicker from './shared/SectionPicker'
 import DatePicker from './shared/DatePicker'
 import PriorityPicker from './shared/PriorityPicker'
@@ -43,6 +44,48 @@ export default function CollectionView({
       },
     }),
   )
+  const { mutate: reorderSections } = useMutation(
+    trpc.section.reoder.mutationOptions({
+      onSuccess: async () => {
+        console.log('sections reordered')
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readOne.queryKey({
+            id: collection.id,
+          }),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.task.today.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.inbox.queryKey(),
+        })
+      },
+    }),
+  )
+
+  const [parentRef, draggableSections, setValues] = useDragAndDrop<
+    HTMLDivElement,
+    SectionDetailType
+  >([], {
+    dragHandle: '.drag-handle',
+    group: 'collection',
+    onDragend: (data) => {
+      reorderSections(
+        data.values.map((section, index) => ({
+          id: (section as SectionDetailType).id,
+          position: index,
+        })),
+      )
+    },
+  })
+  useEffect(() => {
+    if (collection.sections) {
+      setValues(collection.sections)
+    }
+  }, [collection])
 
   return (
     <div className="container">
@@ -54,10 +97,14 @@ export default function CollectionView({
         </span>
       </div>
 
-      <div className="flex flex-col gap-6">
-        {collection.sections?.map((section) => (
+      <div
+        ref={parentRef}
+        data-label={collection.id}
+        className="flex flex-col gap-6">
+        {draggableSections.map((section) => (
           <Section
             key={section.id}
+            data-label={section.id}
             currentCollectionId={collection.id}
             section={section}
             defaultDueDate={
@@ -115,10 +162,60 @@ const Section = ({
   defaultDueDate?: Date | null
 }) => {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  const { mutate: reorderTasks } = useMutation(
+    trpc.task.reoder.mutationOptions({
+      onSuccess: async () => {
+        console.log('tasks reordered')
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readOne.queryKey({
+            id: currentCollectionId,
+          }),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.task.today.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.inbox.queryKey(),
+        })
+      },
+    }),
+  )
+  const [parentRef, draggableTasks, setValues] = useDragAndDrop<
+    HTMLDivElement,
+    TaskType
+  >([], {
+    dragHandle: '.drag-handle',
+    group: 'section',
+    onDragend: (data) => {
+      const sectionId = data.parent.el.dataset['label']
+      if (!sectionId) {
+        console.error('No sectionId found for reorder')
+        return
+      }
+      reorderTasks(
+        data.values.map((task, index) => ({
+          id: (task as TaskType).id,
+          position: index,
+          sectionId: sectionId,
+        })),
+      )
+    },
+  })
+  useEffect(() => {
+    setValues(section.tasks)
+  }, [section])
 
   return (
     <div className="flex gap-4">
-      <FaChevronDown />
+      {section.name !== 'Overdue' && section.name !== 'Uncategorized' && (
+        <RxDragHandleDots2 className="drag-handle" />
+      )}
+      {section.tasks.length > 0 && <FaChevronDown />}
       <div className="flex flex-1 flex-col gap-2">
         {section.name !== 'Uncategorized' && (
           <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
@@ -130,9 +227,9 @@ const Section = ({
             )}
           </div>
         )}
-        <div>
-          {section.tasks.map((task) => (
-            <TaskRow key={task.id} task={task} />
+        <div ref={parentRef} data-label={section.id} className="min-h-4">
+          {draggableTasks.map((task) => (
+            <TaskRow key={task.id} data-label={task.id} task={task} />
           ))}
         </div>
         {section.name !== 'Overdue' && (
@@ -197,6 +294,7 @@ const TaskRow = ({ task }: { task: TaskType }) => {
     <div key={task.id} className="border-b-1 border-b-white/30 py-2">
       <div>
         <div className="flex gap-2">
+          <RxDragHandleDots2 className="drag-handle" />
           <input
             type="checkbox"
             onClick={handleComplete}

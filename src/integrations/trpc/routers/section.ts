@@ -89,20 +89,43 @@ export const sectionRouter = createTRPCRouter({
         },
       })
     }),
-  // reoder: publicProcedure
-  //   .input(z.array(z.object({ id: z.string().min(1), position: z.number() })))
+  // reoderTasks: publicProcedure
+  //   .input(
+  //     z.object({
+  //       sectionId: z.string().min(1),
+  //       tasks: z.array(
+  //         z.object({ id: z.string().min(1), position: z.number() }),
+  //       ),
+  //     }),
+  //   )
   //   .mutation(async ({ ctx, input }) => {
   //     await ctx.db.$transaction(async (tx) => {
-  //       for (const section of input) {
-  //         await tx.section.update({
+  //       for (const task of input.tasks) {
+  //         await tx.task.update({
   //           where: {
-  //             id: section.id,
+  //             id: task.id,
   //           },
   //           data: {
-  //             position: section.position,
+  //             position: task.position,
   //           },
-  //         });
+  //         })
   //       }
-  //     });
+  //     })
   //   }),
+  reoder: publicProcedure
+    .input(z.array(z.object({ id: z.string().min(1), position: z.number() })))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.$transaction(async (tx) => {
+        for (const section of input) {
+          await tx.section.update({
+            where: {
+              id: section.id,
+            },
+            data: {
+              position: section.position,
+            },
+          })
+        }
+      })
+    }),
 })

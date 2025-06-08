@@ -52,6 +52,10 @@
   button:disabled {
     @apply cursor-not-allowed opacity-50;
   }
+
+  .drag-handle {
+    @apply cursor-grab;
+  }
 }
 
 body {
