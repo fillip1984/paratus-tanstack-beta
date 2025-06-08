@@ -10,6 +10,7 @@ import SectionPicker from './shared/SectionPicker'
 import DatePicker from './shared/DatePicker'
 import PriorityPicker from './shared/PriorityPicker'
 import TaskModal from './shared/TaskModal'
+import Modal from './ui/modal'
 import type { FormEvent } from 'react'
 import type { PriorityOption } from '@prisma/client'
 import type {
@@ -126,7 +127,6 @@ export default function CollectionView({
             type="text"
             value={sectionName}
             onChange={(e) => setSectionName(e.target.value)}
-            className="rounded border p-1"
             placeholder="Name of section..."
           />
           <div className="flex gap-2">
@@ -229,7 +229,12 @@ const Section = ({
         )}
         <div ref={parentRef} data-label={section.id} className="min-h-4">
           {draggableTasks.map((task) => (
-            <TaskRow key={task.id} data-label={task.id} task={task} />
+            <TaskRow
+              key={task.id}
+              data-label={task.id}
+              task={task}
+              collectionId={currentCollectionId}
+            />
           ))}
         </div>
         {section.name !== 'Overdue' && (
@@ -256,18 +261,32 @@ const Section = ({
   )
 }
 
-const TaskRow = ({ task }: { task: TaskType }) => {
+const TaskRow = ({
+  task,
+  collectionId,
+}: {
+  task: TaskType
+  collectionId: string
+}) => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const { mutate: updateTask } = useMutation(
     trpc.task.update.mutationOptions({
       onSuccess: async () => {
-        // await queryClient.invalidateQueries({
-        //   queryKey: [trpc.task.today.queryKey()],
-        // })
         await queryClient.invalidateQueries({
-          queryKey: [trpc.collection.readAll.queryKey()],
+          queryKey: trpc.task.today.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.inbox.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readOne.queryKey({
+            id: collectionId,
+          }),
         })
       },
     }),
@@ -291,44 +310,49 @@ const TaskRow = ({ task }: { task: TaskType }) => {
     updateTask({ ...task, sectionId })
   }
   return (
-    <div key={task.id} className="border-b-1 border-b-white/30 py-2">
-      <div>
-        <div className="flex gap-2">
-          <RxDragHandleDots2 className="drag-handle" />
-          <input
-            type="checkbox"
-            onClick={handleComplete}
-            className="rounded-full bg-inherit"
-          />
-          <div onClick={handleTaskModal} className="flex flex-1 flex-col">
-            <span className="text-sm">{task.text}</span>
-            <span className="text-xs">{task.description}</span>
-            <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
-              <DatePicker
-                value={task.dueDate}
-                setValue={handleTaskDueDateChange}
-              />
-              <PriorityPicker
-                value={task.priority}
-                setValue={(priority) => {
-                  updateTask({ ...task, priority })
-                }}
-              />
-              <div className="ml-auto">
-                <SectionPicker
-                  value={task.sectionId}
-                  setValue={handleSectionChange}
+    <>
+      <div className="hover:bg-foreground/40 cursor-pointer border-b-1 border-b-white/30 py-2">
+        <div>
+          <div className="flex gap-2">
+            <RxDragHandleDots2 className="drag-handle" />
+            <input
+              type="checkbox"
+              onClick={handleComplete}
+              className="rounded-full bg-inherit"
+            />
+            <div onClick={handleTaskModal} className="flex flex-1 flex-col">
+              <span className="text-sm">{task.text}</span>
+              <span className="text-xs">{task.description}</span>
+              <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
+                <DatePicker
+                  value={task.dueDate}
+                  setValue={handleTaskDueDateChange}
                 />
+                <PriorityPicker
+                  value={task.priority}
+                  setValue={(priority) => {
+                    updateTask({ ...task, priority })
+                  }}
+                />
+                <div className="ml-auto">
+                  <SectionPicker
+                    value={task.sectionId}
+                    setValue={handleSectionChange}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        {isTaskModalOpen && (
-          <TaskModal task={task} dismiss={() => setIsTaskModalOpen(false)} />
-        )}
       </div>
-    </div>
+      <Modal isOpen={isTaskModalOpen} close={() => setIsTaskModalOpen(false)}>
+        <TaskModal
+          task={task}
+          dismiss={() => setIsTaskModalOpen(false)}
+          collectionId={collectionId}
+        />
+      </Modal>
+    </>
   )
 }
 
