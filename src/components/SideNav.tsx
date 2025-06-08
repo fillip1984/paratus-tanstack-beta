@@ -13,16 +13,38 @@ import Modal from './ui/modal'
 import { useTRPC } from '@/integrations/trpc/react'
 
 export default function SideNav() {
+  const trpc = useTRPC()
+  const { data: collections } = useQuery(trpc.collection.readAll.queryOptions())
+  const { data: inbox } = useQuery(trpc.collection.inbox.queryOptions())
+  const { data: today } = useQuery(trpc.task.today.queryOptions())
+
   const navItems = [
-    { to: '/search', label: 'Search', icon: FaSearch },
-    { to: '/inbox', label: 'Inbox', icon: FaInbox },
-    { to: '/today', label: 'Today', icon: FaCalendarDay },
+    {
+      to: '/search',
+      label: 'Search',
+      icon: FaSearch,
+    },
+    {
+      to: '/inbox',
+      label: 'Inbox',
+      icon: FaInbox,
+      count: (
+        <span className="ml-auto text-xs text-gray-300">
+          {inbox?.sections.map((s) => s.tasks).flat(1).length}
+        </span>
+      ),
+    },
+    {
+      to: '/today',
+      label: 'Today',
+      icon: FaCalendarDay,
+      count: (
+        <span className="ml-auto text-xs text-gray-300">{today?.length}</span>
+      ),
+    },
     { to: '/upcoming', label: 'Upcoming', icon: FaCalendarWeek },
   ]
   const [isAddCollectionOpen, setIsAddCollectionOpen] = useState(false)
-
-  const trpc = useTRPC()
-  const { data: collections } = useQuery(trpc.collection.readAll.queryOptions())
 
   return (
     <>
@@ -34,6 +56,7 @@ export default function SideNav() {
             className={`[&.active]:text-primary [&.active]:bg-background hover:bg-background/60 mx-2 flex items-center rounded-xl p-2 transition duration-200`}>
             <item.icon className="mr-2" />
             {item.label}
+            {item.count}
           </Link>
         ))}
 
@@ -55,7 +78,9 @@ export default function SideNav() {
                 params={{ collectionId: collection.id }}
                 className="hover:bg-background flex items-center justify-between rounded-xl px-2 py-1">
                 <span># {collection.name}</span>
-                {collection._taskCount ?? 0}
+                <span className="text-xs text-gray-300">
+                  {collection.sections.map((s) => s.tasks).flat(1).length}
+                </span>
               </Link>
             ))}
         </div>

@@ -2,19 +2,23 @@ import type { PriorityOption } from '@prisma/client'
 
 export type CollectionDetailType = {
   id: string
-  heading: string
-  taskCount: number
+  name: string
+  // heading: string
+  // taskCount: number
   sections?: Array<SectionDetailType>
   // sections: (SectionDetailType & { sectionNature?: SectionNatureType })[];
 }
 
-export type SectionNatureType = 'overdue' | 'today' | 'upcoming'
+// export type SectionNatureType = 'overdue' | 'today' | 'upcoming'
 export type SectionDetailType = {
   id: string
   name: string
   position: number
   tasks: Array<TaskType>
-  nature?: SectionNatureType
+  _count: {
+    tasks: number
+  }
+  // nature?: SectionNatureType
 }
 export type TaskType = {
   id: string

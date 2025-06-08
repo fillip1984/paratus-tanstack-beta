@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import type { CollectionDetailType } from '@/integrations/trpc/types'
 import CollectionView from '@/components/CollectionView'
 import { useTRPC } from '@/integrations/trpc/react'
 
@@ -12,6 +13,12 @@ function RouteComponent() {
   const { data: inbox } = useQuery(trpc.collection.inbox.queryOptions())
 
   return (
-    <CollectionView collection={{ ...inbox, heading: 'Inbox', taskCount: 1 }} />
+    <CollectionView
+      collection={
+        {
+          ...inbox,
+        } as CollectionDetailType
+      }
+    />
   )
 }

@@ -50,6 +50,9 @@ export const collectionRouter = createTRPCRouter({
               id: true,
               name: true,
               position: true,
+              _count: {
+                select: { tasks: true },
+              },
               tasks: {
                 orderBy: {
                   position: 'asc',

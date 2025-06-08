@@ -24,33 +24,33 @@ function RouteComponent() {
     id: 'overdue',
     name: 'Overdue',
     position: 0,
-    nature: 'overdue',
     tasks:
       tasks?.filter(
         (task) =>
           task.dueDate &&
           startOfDay(new Date()).getTime() > task.dueDate.getTime(),
       ) ?? [],
+    _count: {
+      tasks: tasks?.length ?? 0,
+    },
   }
   const todaySection: SectionDetailType = {
     id: 'today',
     name: 'Jun 1 - Today - Sunday',
     position: 1,
-    nature: 'today',
     tasks:
       tasks?.filter(
         (task) => task.dueDate && isSameDay(task.dueDate, new Date()),
       ) ?? [],
+    _count: {
+      tasks: tasks?.length ?? 0,
+    },
   }
   const today = {
     name: 'Today',
     id: 'today',
     sections: [overdueSection, todaySection],
-    heading: 'Today',
-    taskCount: tasks?.length,
   } as CollectionDetailType
 
-  return (
-    <CollectionView collection={{ ...today, heading: 'Today', taskCount: 0 }} />
-  )
+  return <CollectionView collection={{ ...today, name: 'Today' }} />
 }

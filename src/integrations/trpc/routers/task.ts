@@ -1,10 +1,17 @@
 import { PriorityOption } from '@prisma/client'
 import { z } from 'zod'
+import { endOfDay, startOfDay } from 'date-fns'
 import { createTRPCRouter, publicProcedure } from '../init'
 
 export const taskRouter = createTRPCRouter({
   today: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.task.findMany({
+      where: {
+        dueDate: {
+          gte: startOfDay(new Date()),
+          lt: endOfDay(new Date()), // up to end of today
+        },
+      },
       orderBy: {
         text: 'asc',
       },

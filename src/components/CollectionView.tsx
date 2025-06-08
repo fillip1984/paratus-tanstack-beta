@@ -47,10 +47,10 @@ export default function CollectionView({
   return (
     <div className="container">
       <div className="mx-6 my-10">
-        <h2>{collection.heading}</h2>
+        <h2>{collection.name}</h2>
         <span className="flex items-center gap-2 text-sm font-thin">
           <FaRegCheckCircle />
-          {collection.taskCount} tasks
+          {collection.sections?.map((s) => s.tasks).flat(1).length} tasks
         </span>
       </div>
 
@@ -61,7 +61,7 @@ export default function CollectionView({
             currentCollectionId={collection.id}
             section={section}
             defaultDueDate={
-              collection.heading === 'Today' ? startOfDay(new Date()) : null
+              collection.name === 'Today' ? startOfDay(new Date()) : null
             }
           />
         ))}
@@ -123,6 +123,11 @@ const Section = ({
         {section.name !== 'Uncategorized' && (
           <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
             {section.name}
+            {section._count.tasks > 0 && (
+              <span className="text-xs text-gray-300">
+                {section._count.tasks}
+              </span>
+            )}
           </div>
         )}
         <div>
@@ -130,7 +135,7 @@ const Section = ({
             <TaskRow key={task.id} task={task} />
           ))}
         </div>
-        {section.nature !== 'overdue' && (
+        {section.name !== 'Overdue' && (
           <div>
             {isAddTaskOpen ? (
               <AddTaskCard
