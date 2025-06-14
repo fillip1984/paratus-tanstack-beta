@@ -8,6 +8,7 @@ import DatePicker from './shared/DatePicker'
 import PriorityPicker from './shared/PriorityPicker'
 import SectionPicker from './shared/SectionPicker'
 import AddTaskCard from './shared/AddTaskCard'
+import TaskListRow from './shared/TaskListRow'
 import type { PriorityOption } from '@prisma/client'
 import type { TaskType } from '@/integrations/trpc/types'
 import { useTRPC } from '@/integrations/trpc/react'
@@ -133,6 +134,11 @@ export default function TaskModal({
         <div>
           <span>List name</span>
         </div>
+        {task.parentId && (
+          <button className="button-secondary button-compact">
+            Go to parent
+          </button>
+        )}
 
         {/* trailing */}
         <div className="flex items-center gap-3">
@@ -222,9 +228,19 @@ export default function TaskModal({
             </div>
           </div>
           <div className="mt-4 ml-6 flex flex-col">
-            <div>
-              {task.children.map((subtask) => (
-                <div key={subtask.id}>{subtask.text}</div>
+            {task.children && task.children.length > 0 && (
+              <span className="text-muted text-sm">
+                {task.children.length} sub-task
+                {task.children.length > 1 ? 's' : ''}
+              </span>
+            )}
+            <div className="flex flex-col gap-1">
+              {task.children?.map((subtask) => (
+                <TaskListRow
+                  key={subtask.id}
+                  task={subtask}
+                  collectionId={collectionId}
+                />
               ))}
             </div>
             {isAddingSubTask ? (
