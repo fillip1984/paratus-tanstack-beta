@@ -124,7 +124,7 @@ export default function TaskModal({
   }
 
   return (
-    <div className="flex h-[400px] w-[600px] flex-col">
+    <div className="flex h-[400px] max-w-[800px] flex-col">
       {/* header */}
       <div className="flex items-center justify-between p-2">
         {/* leading */}
@@ -173,7 +173,7 @@ export default function TaskModal({
             />
             <div className="flex flex-1 flex-col">
               {isEditingTextOrDescriptionTarget ? (
-                <div className="rounded-lg border border-white/30 p-1">
+                <div className="flex flex-col rounded-lg border border-white/30 p-1">
                   <input
                     type="text"
                     value={text}

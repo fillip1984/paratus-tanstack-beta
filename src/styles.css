@@ -65,12 +65,8 @@
 }
 
 @layer components {
-  .container {
-    @apply flex flex-1 flex-col overflow-x-auto pr-3 pb-24 pl-2;
-  }
-
   .container-centered {
-    @apply flex flex-1 flex-col items-center justify-center;
+    @apply mx-auto flex max-w-[800px] flex-1 flex-col overflow-x-auto pr-3 pb-24;
   }
 
   .button-primary {

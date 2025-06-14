@@ -90,7 +90,7 @@ export default function CollectionView({
   }, [collection])
 
   return (
-    <div className="container">
+    <div className="container-centered">
       <div className="mx-6 my-10">
         <h2>{collection.name}</h2>
         <span className="flex items-center gap-2 text-sm font-thin">
