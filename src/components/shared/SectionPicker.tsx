@@ -111,7 +111,7 @@ export default function SectionPicker({
       button={
         <button
           type="button"
-          className="bg-accent1 flex items-center gap-2 rounded px-2 py-1 text-xs">
+          className="bg-accent1 flex items-center gap-1 rounded px-2 py-1 text-[11px]">
           {sectionPickerValue?.label} <FaAngleDown />
         </button>
       }
