@@ -49,14 +49,16 @@ export default function PriorityPicker({
     )
 
   useEffect(() => {
-    // console.log('priority value', value)
-    if (priorityPickerValue && priorityPickerValue.value !== value) {
-      // console.log(
-      //   "only update priority if there's a change in the value and not initialization",
-      // )
-      setValue(priorityPickerValue.value ?? null)
+    if (value && priorityPickerValue?.value !== value) {
+      const foundPriority = priorities.find((p) => p.value === value)
+      setPriorityPickerValue(foundPriority ?? null)
     }
-  }, [priorityPickerValue])
+  }, [value])
+
+  const handleUpdate = (newValue: PriorityType) => {
+    setPriorityPickerValue(newValue)
+    setValue(newValue.value)
+  }
 
   return (
     <PopupMenu
@@ -89,7 +91,7 @@ export default function PriorityPicker({
             <button
               key={p.value}
               type="button"
-              onClick={() => setPriorityPickerValue(p)}
+              onClick={() => handleUpdate(p)}
               className="hover:bg-accent1/50 flex items-center gap-2 rounded p-2 text-xs">
               {p.icon} {p.label}
             </button>

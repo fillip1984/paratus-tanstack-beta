@@ -248,7 +248,7 @@ const Section = ({
       {/* list */}
       <div ref={parent} className="ml-2 flex flex-1 flex-col gap-2">
         {!isCollapsed && (
-          <div>
+          <>
             <div ref={parentRef} data-label={section.id} className="min-h-4">
               {draggableTasks.map((task) => (
                 <TaskRow
@@ -278,7 +278,7 @@ const Section = ({
                 )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

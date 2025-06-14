@@ -10,8 +10,8 @@ import {
   startOfTomorrow,
 } from 'date-fns'
 import { useEffect, useState } from 'react'
-import { FaCalendarAlt, FaCalendarDay, FaSun } from 'react-icons/fa'
 import { CgCalendarNext } from 'react-icons/cg'
+import { FaCalendarAlt, FaCalendarDay, FaSun } from 'react-icons/fa'
 import { MdOutlineWeekend } from 'react-icons/md'
 import PopupMenu from '../ui/popupMenu'
 import { capitalizeFirstLetter } from '@/utils/String'
@@ -56,27 +56,28 @@ export default function DatePicker({
   value: Date | null
   setValue: (value: Date | null) => void
 }) {
-  const [datePickerValue, setDatePickerValue] = useState<DateType | null>(
-    value
-      ? (quickDateOptions.find((d) => isEqual(d.value, value)) ?? {
-          label: format(value, 'MMM/dd/yyyy'),
-          value,
-          icon: <FaCalendarAlt />,
-        })
-      : null,
-  )
+  const [datePickerValue, setDatePickerValue] = useState<DateType | null>()
   useEffect(() => {
-    if (
-      datePickerValue &&
-      datePickerValue.value?.getTime() !== value?.getTime()
-    ) {
+    // console.log('useEffect for value change. dpv: ', datePickerValue, value)
+    if (value && datePickerValue?.value !== value) {
       // console.log(
-      //   "only update dueDate if there's a change in the value and not initialization",
+      //   'initialization of datePickerValue or value changed from elsewhere',
       // )
-      setValue(datePickerValue.value)
+      const foundDueDate = quickDateOptions.find((d) =>
+        isEqual(d.value, value),
+      ) ?? {
+        label: format(value, 'MMM/dd/yyyy'),
+        value,
+        icon: <FaCalendarAlt />,
+      }
+      setDatePickerValue(foundDueDate)
     }
-  }, [datePickerValue])
+  }, [value])
 
+  const handleUpdate = (date: DateType) => {
+    setDatePickerValue(date)
+    setValue(date.value)
+  }
   return (
     <div className="flex gap-2">
       <PopupMenu
@@ -124,7 +125,7 @@ export default function DatePicker({
                   <button
                     key={d.value.toString()}
                     type="button"
-                    onClick={() => setDatePickerValue(d)}
+                    onClick={() => handleUpdate(d)}
                     className="hover:bg-accent1/50 flex items-center gap-2 rounded p-1 text-xs">
                     {d.icon} {d.label}
                     <span className="ml-auto">
