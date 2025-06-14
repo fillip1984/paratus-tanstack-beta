@@ -163,18 +163,18 @@ const Section = ({
   defaultDueDate?: Date | null
 }) => {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
+
   const [isCollapsed, setIsCollapsed] = useState(false)
-  // const sectionRef = useRef<HTMLDivElement>(null)
   const [parent, enableAnimations] = useAutoAnimate()
   useEffect(() => {
     enableAnimations(!isCollapsed)
   }, [isCollapsed])
+
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const { mutate: reorderTasks } = useMutation(
     trpc.task.reoder.mutationOptions({
       onSuccess: async () => {
-        console.log('tasks reordered')
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.readAll.queryKey(),
         })
@@ -214,32 +214,39 @@ const Section = ({
     },
   })
   useEffect(() => {
+    // console.log('setting values for section', section.id)
     setValues(section.tasks)
   }, [section])
 
   return (
-    <div ref={parent} className="flex items-start gap-4">
-      {section.name !== 'Overdue' && section.name !== 'Uncategorized' && (
-        <RxDragHandleDots2 className="drag-handle" />
-      )}
-      {section.tasks.length > 0 && (
-        <button type="button" onClick={() => setIsCollapsed((prev) => !prev)}>
-          <FaChevronDown
-            className={`${isCollapsed ? '-rotate-90' : ''} transition`}
-          />
-        </button>
-      )}
-      <div className="flex flex-1 flex-col gap-2">
-        {section.name !== 'Uncategorized' && (
-          <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
-            {section.name}
-            {section._count.tasks > 0 && (
-              <span className="text-xs text-gray-300">
-                {section._count.tasks}
-              </span>
-            )}
-          </div>
+    <div>
+      {/* heading */}
+      <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
+        {section.name !== 'Overdue' && section.name !== 'Uncategorized' ? (
+          <RxDragHandleDots2 className="drag-handle" />
+        ) : (
+          <div className="w-4"></div>
         )}
+        {
+          <button type="button" onClick={() => setIsCollapsed((prev) => !prev)}>
+            <FaChevronDown
+              className={`${isCollapsed ? '-rotate-90' : ''} transition`}
+            />
+          </button>
+        }
+
+        <div
+          className={`flex items-center gap-2 ${section.name === 'Uncategorized' ? 'text-gray-500' : section.name === 'Overdue' ? 'text-red-500' : ''} : ''}`}>
+          {section.name}
+          {section._count.tasks > 0 && (
+            <span className="text-xs text-gray-300">
+              {section._count.tasks}
+            </span>
+          )}
+        </div>
+      </div>
+      {/* list */}
+      <div ref={parent} className="ml-2 flex flex-1 flex-col gap-2">
         {!isCollapsed && (
           <div>
             <div ref={parentRef} data-label={section.id} className="min-h-4">
@@ -253,7 +260,7 @@ const Section = ({
               ))}
             </div>
             {section.name !== 'Overdue' && (
-              <div>
+              <div className="mt-2 ml-4">
                 {isAddTaskOpen ? (
                   <AddTaskCard
                     currentCollectionId={currentCollectionId}
@@ -265,7 +272,7 @@ const Section = ({
                   <button
                     type="button"
                     onClick={() => setIsAddTaskOpen((prev) => !prev)}
-                    className="flex items-center gap-2 font-thin">
+                    className="flex items-center gap-2 rounded p-1 font-thin hover:bg-white/10">
                     <FaPlus className="text-primary" /> Add task
                   </button>
                 )}
@@ -327,7 +334,7 @@ const TaskRow = ({
     updateTask({ ...task, sectionId })
   }
   return (
-    <>
+    <div>
       <div className="hover:bg-foreground/40 cursor-pointer border-b-1 border-b-white/30 py-2">
         <div>
           <div className="flex gap-2">
@@ -369,7 +376,7 @@ const TaskRow = ({
           collectionId={collectionId}
         />
       </Modal>
-    </>
+    </div>
   )
 }
 

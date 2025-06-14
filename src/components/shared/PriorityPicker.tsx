@@ -49,6 +49,7 @@ export default function PriorityPicker({
     )
 
   useEffect(() => {
+    console.log('value', value)
     if (priorityPickerValue && priorityPickerValue.value !== value) {
       // console.log(
       //   "only update priority if there's a change in the value and not initialization",

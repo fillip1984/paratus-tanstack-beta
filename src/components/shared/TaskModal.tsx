@@ -171,12 +171,12 @@ export default function TaskModal({
               onClick={handleComplete}
               className="mt-1 rounded-full bg-inherit"
             />
-            <div className="flex flex-col">
+            <div className="flex flex-1 flex-col">
               {isEditingTextOrDescriptionTarget ? (
                 <div className="rounded-lg border border-white/30 p-1">
                   <input
                     type="text"
-                    value={task.text}
+                    value={text}
                     onChange={(e) => setText(e.target.value)}
                     ref={textEditingRef}
                     placeholder="Task..."
@@ -203,7 +203,7 @@ export default function TaskModal({
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col">
+                <div className="flex flex-1 flex-col">
                   <span
                     onClick={() => setIsEditingTextOrDescriptionTarget('text')}>
                     {text}

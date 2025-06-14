@@ -11,6 +11,7 @@ export const taskRouter = createTRPCRouter({
           gte: startOfDay(new Date()),
           lt: endOfDay(new Date()), // up to end of today
         },
+        complete: false,
       },
       orderBy: {
         text: 'asc',
