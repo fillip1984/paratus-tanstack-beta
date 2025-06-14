@@ -6,6 +6,7 @@ import { FaChevronDown, FaPlus, FaRegCheckCircle } from 'react-icons/fa'
 import { RxDragHandleDots2, RxSection } from 'react-icons/rx'
 import TextareaAutosize from 'react-textarea-autosize'
 import { useDragAndDrop } from '@formkit/drag-and-drop/react'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import SectionPicker from './shared/SectionPicker'
 import DatePicker from './shared/DatePicker'
 import PriorityPicker from './shared/PriorityPicker'
@@ -162,6 +163,12 @@ const Section = ({
   defaultDueDate?: Date | null
 }) => {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  // const sectionRef = useRef<HTMLDivElement>(null)
+  const [parent, enableAnimations] = useAutoAnimate()
+  useEffect(() => {
+    enableAnimations(!isCollapsed)
+  }, [isCollapsed])
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const { mutate: reorderTasks } = useMutation(
@@ -211,11 +218,17 @@ const Section = ({
   }, [section])
 
   return (
-    <div className="flex gap-4">
+    <div ref={parent} className="flex items-start gap-4">
       {section.name !== 'Overdue' && section.name !== 'Uncategorized' && (
         <RxDragHandleDots2 className="drag-handle" />
       )}
-      {section.tasks.length > 0 && <FaChevronDown />}
+      {section.tasks.length > 0 && (
+        <button type="button" onClick={() => setIsCollapsed((prev) => !prev)}>
+          <FaChevronDown
+            className={`${isCollapsed ? '-rotate-90' : ''} transition`}
+          />
+        </button>
+      )}
       <div className="flex flex-1 flex-col gap-2">
         {section.name !== 'Uncategorized' && (
           <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
@@ -227,32 +240,36 @@ const Section = ({
             )}
           </div>
         )}
-        <div ref={parentRef} data-label={section.id} className="min-h-4">
-          {draggableTasks.map((task) => (
-            <TaskRow
-              key={task.id}
-              data-label={task.id}
-              task={task}
-              collectionId={currentCollectionId}
-            />
-          ))}
-        </div>
-        {section.name !== 'Overdue' && (
+        {!isCollapsed && (
           <div>
-            {isAddTaskOpen ? (
-              <AddTaskCard
-                currentCollectionId={currentCollectionId}
-                currentSectionId={section.id}
-                defaultDueDate={defaultDueDate ?? null}
-                dismiss={() => setIsAddTaskOpen((prev) => !prev)}
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsAddTaskOpen((prev) => !prev)}
-                className="flex items-center gap-2 font-thin">
-                <FaPlus className="text-primary" /> Add task
-              </button>
+            <div ref={parentRef} data-label={section.id} className="min-h-4">
+              {draggableTasks.map((task) => (
+                <TaskRow
+                  key={task.id}
+                  data-label={task.id}
+                  task={task}
+                  collectionId={currentCollectionId}
+                />
+              ))}
+            </div>
+            {section.name !== 'Overdue' && (
+              <div>
+                {isAddTaskOpen ? (
+                  <AddTaskCard
+                    currentCollectionId={currentCollectionId}
+                    currentSectionId={section.id}
+                    defaultDueDate={defaultDueDate ?? null}
+                    dismiss={() => setIsAddTaskOpen((prev) => !prev)}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddTaskOpen((prev) => !prev)}
+                    className="flex items-center gap-2 font-thin">
+                    <FaPlus className="text-primary" /> Add task
+                  </button>
+                )}
+              </div>
             )}
           </div>
         )}
