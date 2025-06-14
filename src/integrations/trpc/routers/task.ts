@@ -54,6 +54,7 @@ export const taskRouter = createTRPCRouter({
         dueDate: z.date().nullish(),
         priority: z.nativeEnum(PriorityOption).nullish(),
         sectionId: z.string().min(1),
+        parentTaskId: z.string().nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -73,6 +74,7 @@ export const taskRouter = createTRPCRouter({
           priority: input.priority,
           sectionId: input.sectionId,
           position: section?._count.tasks ?? 0,
+          parentId: input.parentTaskId,
         },
       })
     }),

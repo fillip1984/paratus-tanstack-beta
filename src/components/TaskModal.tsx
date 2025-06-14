@@ -3,10 +3,11 @@ import { useEffect, useRef, useState } from 'react'
 import { FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa'
 import { FaEllipsis, FaPlus, FaX } from 'react-icons/fa6'
 import TextareaAutosize from 'react-textarea-autosize'
-import PopupMenu from '../ui/popupMenu'
-import DatePicker from './DatePicker'
-import PriorityPicker from './PriorityPicker'
-import SectionPicker from './SectionPicker'
+import PopupMenu from './ui/popupMenu'
+import DatePicker from './shared/DatePicker'
+import PriorityPicker from './shared/PriorityPicker'
+import SectionPicker from './shared/SectionPicker'
+import AddTaskCard from './shared/AddTaskCard'
 import type { PriorityOption } from '@prisma/client'
 import type { TaskType } from '@/integrations/trpc/types'
 import { useTRPC } from '@/integrations/trpc/react'
@@ -28,6 +29,7 @@ export default function TaskModal({
   ] = useState('')
   const [text, setText] = useState('')
   const [description, setDescription] = useState('')
+  const [isAddingSubTask, setIsAddingSubTask] = useState(false)
   // const [dueDate, setDueDate] = useState<Date | null>(task.dueDate ?? null)
 
   useEffect(() => {
@@ -220,11 +222,27 @@ export default function TaskModal({
             </div>
           </div>
           <div className="mt-4 ml-6 flex flex-col">
-            <button
-              type="button"
-              className="flex w-fit items-center gap-2 rounded p-1 text-sm hover:bg-white/30">
-              <FaPlus /> Add checklist item
-            </button>
+            <div>
+              {task.children.map((subtask) => (
+                <div key={subtask.id}>{subtask.text}</div>
+              ))}
+            </div>
+            {isAddingSubTask ? (
+              <AddTaskCard
+                currentCollectionId={collectionId}
+                currentSectionId={task.sectionId}
+                parentTaskId={task.id}
+                defaultDueDate={null}
+                dismiss={() => setIsAddingSubTask((prev) => !prev)}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsAddingSubTask((prev) => !prev)}
+                className="flex w-fit items-center gap-2 rounded p-1 text-sm hover:bg-white/30">
+                <FaPlus /> Add sub-task
+              </button>
+            )}
           </div>
         </div>
         {/* aside */}

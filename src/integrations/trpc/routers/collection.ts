@@ -24,6 +24,7 @@ export const collectionRouter = createTRPCRouter({
               select: {
                 text: true,
               },
+              include: { children: true },
               where: { complete: { not: true } },
             },
           },
@@ -57,6 +58,7 @@ export const collectionRouter = createTRPCRouter({
                 orderBy: {
                   position: 'asc',
                 },
+                include: { children: true },
                 where: { complete: { not: true } },
               },
             },
@@ -82,6 +84,7 @@ export const collectionRouter = createTRPCRouter({
               select: { tasks: true },
             },
             tasks: {
+              include: { children: true },
               where: { complete: { not: true } },
             },
           },

@@ -29,6 +29,7 @@ export type TaskType = {
   sectionId: string
   complete: boolean
   position: number
+  children: Array<TaskType>
 
   // dueDate?: Date | null;
   // completedAt?: Date | null;
