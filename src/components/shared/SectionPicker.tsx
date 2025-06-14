@@ -51,7 +51,7 @@ export default function SectionPicker({
     // wait for collections and inbox to be fetched and set
     if (!collections || !inbox) return
 
-    console.log('initialization and default picker', value)
+    // console.log('initialization and default picker', value)
     if (!value || value === 'today') {
       console.log(
         'no suitable suggested section given, default to inbox. Given suggested value:',

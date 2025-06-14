@@ -17,7 +17,7 @@ export default function Modal({
   // See: https://stackoverflow.com/questions/54989513/react-prevent-scroll-when-modal-is-open
   useEffect(() => {
     if (isOpen) {
-      console.log(`width: ${width}`)
+      // console.log(`scrollbar width: ${width}`)
       document.body.classList.add('overflow-hidden', `pr-[${width}px]`)
     } else {
       document.body.classList.remove('overflow-hidden', `pr-[${width}px]`)
