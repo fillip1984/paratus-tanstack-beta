@@ -66,6 +66,19 @@ export const taskRouter = createTRPCRouter({
           },
         },
       })
+      let position = section?._count.tasks ?? 0
+      if (input.parentTaskId) {
+        const parentTask = await ctx.db.task.findUnique({
+          where: { id: input.parentTaskId },
+          select: {
+            text: true,
+            children: true,
+          },
+        })
+        if (parentTask) {
+          position = parentTask.children.length + 1
+        }
+      }
       return await ctx.db.task.create({
         data: {
           text: input.text,
@@ -73,7 +86,7 @@ export const taskRouter = createTRPCRouter({
           dueDate: input.dueDate,
           priority: input.priority,
           sectionId: input.sectionId,
-          position: section?._count.tasks ?? 0,
+          position: position,
           parentId: input.parentTaskId,
         },
       })
@@ -120,7 +133,7 @@ export const taskRouter = createTRPCRouter({
         },
       })
     }),
-  reoder: publicProcedure
+  reorder: publicProcedure
     .input(
       z.array(
         z.object({

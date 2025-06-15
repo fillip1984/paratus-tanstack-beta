@@ -167,7 +167,7 @@ const Section = ({
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const { mutate: reorderTasks } = useMutation(
-    trpc.task.reoder.mutationOptions({
+    trpc.task.reorder.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.readAll.queryKey(),
@@ -209,7 +209,7 @@ const Section = ({
   })
   useEffect(() => {
     // console.log('setting values for section', section.id)
-    setValues(section.tasks)
+    setValues(section.tasks.filter((t) => !t.parentId))
   }, [section])
 
   return (
