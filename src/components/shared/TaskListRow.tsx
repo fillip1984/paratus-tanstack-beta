@@ -42,9 +42,9 @@ export default function TaskRow({
     }),
   )
 
-  const handleComplete = () => {
+  const handleToggleComplete = () => {
     console.log('handling complete')
-    updateTask({ ...task, complete: true })
+    updateTask({ ...task, complete: !task.complete })
   }
 
   const handleTaskModal = () => {
@@ -67,16 +67,22 @@ export default function TaskRow({
             <RxDragHandleDots2 className="drag-handle" />
             <input
               type="checkbox"
-              onClick={handleComplete}
+              checked={task.complete}
+              onClick={handleToggleComplete}
               className="rounded-full bg-inherit"
             />
             <div onClick={handleTaskModal} className="flex flex-1 flex-col">
-              <span className="text-sm">{task.text}</span>
+              <span
+                className={`text-sm ${task.complete ? 'line-through' : ''}`}>
+                {task.text}
+              </span>
               <span className="text-xs">{task.description}</span>
               <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
                 {task.children && task.children.length > 0 && (
                   <div className="flex items-center gap-1">
-                    <CgListTree /> {task.children.length}
+                    <CgListTree />{' '}
+                    {task.children.filter((t) => t.complete).length}/
+                    {task.children.length}
                   </div>
                 )}
                 {task.parentId && <TbProgressCheck />}

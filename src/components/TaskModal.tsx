@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa'
 import { FaEllipsis, FaPlus, FaX } from 'react-icons/fa6'
 import TextareaAutosize from 'react-textarea-autosize'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import PopupMenu from './ui/popupMenu'
 import DatePicker from './shared/DatePicker'
 import PriorityPicker from './shared/PriorityPicker'
@@ -31,7 +32,11 @@ export default function TaskModal({
   const [text, setText] = useState('')
   const [description, setDescription] = useState('')
   const [isAddingSubTask, setIsAddingSubTask] = useState(false)
-  // const [dueDate, setDueDate] = useState<Date | null>(task.dueDate ?? null)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [parent, enableAnimations] = useAutoAnimate()
+  useEffect(() => {
+    enableAnimations(!isCollapsed)
+  }, [isCollapsed])
 
   useEffect(() => {
     setText(task.text)
@@ -170,9 +175,9 @@ export default function TaskModal({
       </div>
 
       {/* main content */}
-      <div className="grid h-full grid-cols-5 border-t">
+      <div className="grid h-full grid-cols-5 overflow-hidden border-t">
         {/* main */}
-        <div className="col-span-3 flex flex-col p-2">
+        <div className="col-span-3 flex flex-col overflow-x-auto p-2 pb-4">
           <div className="flex gap-2">
             <input
               type="checkbox"
@@ -227,38 +232,51 @@ export default function TaskModal({
               )}
             </div>
           </div>
-          <div className="mt-4 ml-6 flex flex-col">
+          <div ref={parent} className="mt-4 ml-6 flex flex-col">
             {task.children && task.children.length > 0 && (
-              <span className="text-muted text-sm">
-                {task.children.length} sub-task
-                {task.children.length > 1 ? 's' : ''}
-              </span>
-            )}
-            <div className="flex flex-col gap-1">
-              {task.children?.map((subtask) => (
-                <TaskListRow
-                  key={subtask.id}
-                  task={subtask}
-                  collectionId={collectionId}
-                />
-              ))}
-            </div>
-            {isAddingSubTask ? (
-              <AddTaskCard
-                currentCollectionId={collectionId}
-                currentSectionId={task.sectionId}
-                parentTaskId={task.id}
-                defaultDueDate={null}
-                dismiss={() => setIsAddingSubTask((prev) => !prev)}
-              />
-            ) : (
               <button
                 type="button"
-                onClick={() => setIsAddingSubTask((prev) => !prev)}
-                className="flex w-fit items-center gap-2 rounded p-1 text-sm hover:bg-white/30">
-                <FaPlus /> Add sub-task
+                onClick={() => setIsCollapsed((prev) => !prev)}
+                className="flex items-center gap-1">
+                <FaChevronDown
+                  className={`transition ${isCollapsed ? '-rotate-90' : ''}`}
+                />
+                Sub-tasks
+                <span className="text-muted text-xs">
+                  {task.children.filter((t) => t.complete).length}/
+                  {task.children.length}
+                </span>
               </button>
             )}
+            {!isCollapsed && (
+              <div className="ml-2 flex flex-col gap-1">
+                {task.children?.map((subtask) => (
+                  <TaskListRow
+                    key={subtask.id}
+                    task={subtask}
+                    collectionId={collectionId}
+                  />
+                ))}
+              </div>
+            )}
+            <div className="my-1">
+              {isAddingSubTask ? (
+                <AddTaskCard
+                  currentCollectionId={collectionId}
+                  currentSectionId={task.sectionId}
+                  parentTaskId={task.id}
+                  defaultDueDate={null}
+                  dismiss={() => setIsAddingSubTask((prev) => !prev)}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsAddingSubTask((prev) => !prev)}
+                  className="flex w-fit items-center gap-2 rounded p-1 text-sm hover:bg-white/30">
+                  <FaPlus /> Add sub-task
+                </button>
+              )}
+            </div>
           </div>
         </div>
         {/* aside */}
