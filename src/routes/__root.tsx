@@ -68,9 +68,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
         <div className="flex flex-1">
           <Outlet />
-          <TanStackRouterDevtools />
+          {/* <TanStackRouterDevtools  /> */}
 
-          <TanStackQueryLayout />
+          {/* <TanStackQueryLayout /> */}
         </div>
       </div>
     </RootDocument>

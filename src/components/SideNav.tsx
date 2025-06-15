@@ -91,7 +91,7 @@ export default function SideNav() {
           <Link
             key={item.to}
             to={item.to}
-            className={`[&.active]:text-primary [&.active]:bg-background hover:bg-background/60 mx-2 flex items-center rounded-xl p-2 transition duration-200`}>
+            className={`[&.active]:text-primary [&.active]:bg-background hover:bg-background/60 mx-2 flex items-center rounded-xl p-2 transition duration-200 select-none`}>
             <item.icon className="mr-2" />
             {item.label}
             {item.count}
@@ -113,7 +113,7 @@ export default function SideNav() {
               params={{ collectionId: collection.id }}
               key={collection.id}
               data-label={collection.id}
-              className="hover:bg-background flex items-center justify-between rounded-xl px-2 py-1 select-none">
+              className={`[&.active]:text-primary [&.active]:bg-background hover:bg-background/60 mx-2 flex items-center justify-between rounded-xl p-2 transition duration-200 select-none`}>
               <span># {collection.name}</span>
               <span className="text-xs text-gray-300">
                 {collection.taskCount > 0 && collection.taskCount}
