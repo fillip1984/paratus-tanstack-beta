@@ -3,18 +3,18 @@ import { createTRPCRouter, publicProcedure } from '../init'
 
 export const collectionRouter = createTRPCRouter({
   readAll: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.collection.findMany({
+    const collections = await ctx.db.collection.findMany({
       select: {
         id: true,
         name: true,
-        parentId: true,
-        children: {
-          select: {
-            id: true,
-            name: true,
-            parentId: true,
-          },
-        },
+        // parentId: true,
+        // children: {
+        //   select: {
+        //     id: true,
+        //     name: true,
+        //     parentId: true,
+        //   },
+        // },
         sections: {
           select: {
             id: true,
@@ -24,15 +24,23 @@ export const collectionRouter = createTRPCRouter({
               select: {
                 text: true,
               },
-              // include: { children: true },
-              where: { complete: { not: true } },
+              where: { complete: { not: true }, parentId: null },
             },
           },
         },
       },
       orderBy: {
-        name: 'asc',
+        position: 'asc',
       },
+    })
+    // another idea to sum: collection.sections.map((s) => s.tasks).flat(1).length}
+    return collections.map((collection) => {
+      return {
+        ...collection,
+        taskCount: collection.sections
+          .map((s) => s.tasks.length)
+          .reduce((a, b) => a + b, 0),
+      }
     })
   }),
   readOne: publicProcedure
@@ -70,6 +78,9 @@ export const collectionRouter = createTRPCRouter({
                       position: true,
                       parentId: true,
                     },
+                    orderBy: {
+                      position: 'asc',
+                    },
                   },
                 },
                 where: { complete: { not: true } },
@@ -83,7 +94,7 @@ export const collectionRouter = createTRPCRouter({
       })
     }),
   inbox: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.collection.findFirst({
+    const inbox = await ctx.db.collection.findFirst({
       where: { name: 'Inbox' },
       select: {
         id: true,
@@ -97,8 +108,10 @@ export const collectionRouter = createTRPCRouter({
               select: { tasks: true },
             },
             tasks: {
-              include: { children: true },
-              where: { complete: { not: true } },
+              select: {
+                text: true,
+              },
+              where: { complete: { not: true }, parentId: null },
             },
           },
         },
@@ -107,6 +120,12 @@ export const collectionRouter = createTRPCRouter({
         name: 'asc',
       },
     })
+    return {
+      ...inbox,
+      taskCount: inbox?.sections
+        .map((s) => s.tasks.length)
+        .reduce((a, b) => a + b, 0),
+    }
   }),
   create: publicProcedure
     .input(
@@ -115,9 +134,11 @@ export const collectionRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const collectionCount = await ctx.db.collection.count()
       return await ctx.db.collection.create({
         data: {
           name: input.name,
+          position: collectionCount + 1,
           sections: {
             create: [
               {
@@ -135,6 +156,7 @@ export const collectionRouter = createTRPCRouter({
         id: z.string().min(1),
         name: z.string().min(1),
         parentId: z.string().nullish(),
+        position: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -145,6 +167,7 @@ export const collectionRouter = createTRPCRouter({
         data: {
           name: input.name,
           parentId: input.parentId,
+          position: input.position,
         },
       })
     }),
@@ -161,6 +184,29 @@ export const collectionRouter = createTRPCRouter({
         },
       })
     }),
+  reorder: publicProcedure
+    .input(
+      z.array(
+        z.object({
+          id: z.string().min(1),
+          position: z.number(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.$transaction(async (tx) => {
+        for (const collection of input) {
+          await tx.collection.update({
+            where: {
+              id: collection.id,
+            },
+            data: {
+              position: collection.position,
+            },
+          })
+        }
+      })
+    }),
   initializeCollections: publicProcedure.query(async ({ ctx }) => {
     const existingInbox = await ctx.db.collection.findFirst({
       where: { name: 'Inbox' },
@@ -170,6 +216,7 @@ export const collectionRouter = createTRPCRouter({
       await ctx.db.collection.create({
         data: {
           name: 'Inbox',
+          position: 0,
           sections: {
             create: [
               {

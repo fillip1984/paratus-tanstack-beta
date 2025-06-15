@@ -1,5 +1,18 @@
 import type { PriorityOption } from '@prisma/client'
 
+export type CollectionSummaryType = {
+  id: string
+  name: string
+  taskCount: number
+  sections: Array<SectionSummaryType>
+}
+
+export type SectionSummaryType = {
+  id: string
+  name: string
+  position: number
+}
+
 export type CollectionDetailType = {
   id: string
   name: string

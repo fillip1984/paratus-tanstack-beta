@@ -1,5 +1,6 @@
+import { useDragAndDrop } from '@formkit/drag-and-drop/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { FaSearch } from 'react-icons/fa'
 import {
@@ -10,10 +11,12 @@ import {
   FaX,
 } from 'react-icons/fa6'
 import Modal from './ui/modal'
+import type { CollectionSummaryType } from '@/integrations/trpc/types'
 import { useTRPC } from '@/integrations/trpc/react'
 
 export default function SideNav() {
   const trpc = useTRPC()
+  const queryClient = useQueryClient()
   const { data: collections } = useQuery(trpc.collection.readAll.queryOptions())
   const { data: inbox } = useQuery(trpc.collection.inbox.queryOptions())
   const { data: today } = useQuery(trpc.task.today.queryOptions())
@@ -30,7 +33,7 @@ export default function SideNav() {
       icon: FaInbox,
       count: (
         <span className="ml-auto text-xs text-gray-300">
-          {inbox?.sections.map((s) => s.tasks).flat(1).length}
+          {inbox?.taskCount && inbox.taskCount > 0 ? inbox.taskCount : ''}
         </span>
       ),
     },
@@ -39,12 +42,47 @@ export default function SideNav() {
       label: 'Today',
       icon: FaCalendarDay,
       count: (
-        <span className="ml-auto text-xs text-gray-300">{today?.length}</span>
+        <span className="ml-auto text-xs text-gray-300">
+          {today?.length && today.length > 0 ? today.length : ''}
+        </span>
       ),
     },
     { to: '/upcoming', label: 'Upcoming', icon: FaCalendarWeek },
   ]
   const [isAddCollectionOpen, setIsAddCollectionOpen] = useState(false)
+
+  const [parentRef, draggableCollections, setValues] = useDragAndDrop<
+    HTMLDivElement,
+    CollectionSummaryType
+  >([], {
+    onDragend: (data) => {
+      console.log('dragend', data)
+      reorderCollections(
+        data.values.map((collection, index) => ({
+          id: (collection as CollectionSummaryType).id,
+          position: index + 1,
+        })),
+      )
+    },
+  })
+  useEffect(() => {
+    if (collections) {
+      setValues(
+        collections.filter(
+          (c) => c.name !== 'Inbox',
+        ) as Array<CollectionSummaryType>,
+      )
+    }
+  }, [collections])
+  const { mutate: reorderCollections } = useMutation(
+    trpc.collection.reorder.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+      },
+    }),
+  )
 
   return (
     <>
@@ -68,21 +106,20 @@ export default function SideNav() {
             <FaPlus />
           </button>
         </div>
-        <div className="flex flex-col gap-1 px-3 text-sm">
-          {collections
-            ?.filter((c) => c.name !== 'Inbox')
-            .map((collection) => (
-              <Link
-                key={collection.id}
-                to="/collections/$collectionId"
-                params={{ collectionId: collection.id }}
-                className="hover:bg-background flex items-center justify-between rounded-xl px-2 py-1">
-                <span># {collection.name}</span>
-                <span className="text-xs text-gray-300">
-                  {collection.sections.map((s) => s.tasks).flat(1).length}
-                </span>
-              </Link>
-            ))}
+        <div ref={parentRef} className="flex flex-col gap-1 px-3 text-sm">
+          {draggableCollections.map((collection) => (
+            <Link
+              to="/collections/$collectionId"
+              params={{ collectionId: collection.id }}
+              key={collection.id}
+              data-label={collection.id}
+              className="hover:bg-background flex items-center justify-between rounded-xl px-2 py-1 select-none">
+              <span># {collection.name}</span>
+              <span className="text-xs text-gray-300">
+                {collection.taskCount > 0 && collection.taskCount}
+              </span>
+            </Link>
+          ))}
         </div>
       </nav>
 
@@ -107,15 +144,21 @@ const AddCollectionModal = ({
     setIsValid(name.trim() !== '')
   }, [name])
 
+  const navigate = useNavigate()
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const { mutate: createCollection } = useMutation(
     trpc.collection.create.mutationOptions({
-      onSuccess: async () => {
+      onSuccess: async (data) => {
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.readAll.queryKey(),
         })
         close()
+        setName('')
+        navigate({
+          to: '/collections/$collectionId',
+          params: { collectionId: data.id },
+        })
       },
     }),
   )
