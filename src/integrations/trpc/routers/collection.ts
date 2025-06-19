@@ -108,10 +108,27 @@ export const collectionRouter = createTRPCRouter({
               select: { tasks: true },
             },
             tasks: {
-              select: {
-                text: true,
+              orderBy: {
+                position: 'asc',
               },
-              where: { complete: { not: true }, parentId: null },
+              include: {
+                children: {
+                  select: {
+                    complete: true,
+                    id: true,
+                    text: true,
+                    dueDate: true,
+                    priority: true,
+                    sectionId: true,
+                    position: true,
+                    parentId: true,
+                  },
+                  orderBy: {
+                    position: 'asc',
+                  },
+                },
+              },
+              where: { complete: { not: true } },
             },
           },
         },
