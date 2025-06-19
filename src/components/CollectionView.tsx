@@ -7,7 +7,7 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useDragAndDrop } from '@formkit/drag-and-drop/react'
 import { RxDragHandleDots2, RxSection } from 'react-icons/rx'
 import AddTaskCard from './shared/AddTaskCard'
-import TaskRow from './shared/TaskListRow'
+import TaskListRow from './shared/TaskListRow'
 import type {
   CollectionDetailType,
   SectionDetailType,
@@ -245,7 +245,7 @@ const Section = ({
           <>
             <div ref={parentRef} data-label={section.id} className="min-h-4">
               {draggableTasks.map((task) => (
-                <TaskRow
+                <TaskListRow
                   key={task.id}
                   data-label={task.id}
                   task={task}

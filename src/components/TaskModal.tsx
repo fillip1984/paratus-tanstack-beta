@@ -4,6 +4,7 @@ import { FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa'
 import { FaEllipsis, FaPlus, FaX } from 'react-icons/fa6'
 import TextareaAutosize from 'react-textarea-autosize'
 import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { useDragAndDrop } from '@formkit/drag-and-drop/react'
 import PopupMenu from './ui/popupMenu'
 import DatePicker from './shared/DatePicker'
 import PriorityPicker from './shared/PriorityPicker'
@@ -131,6 +132,49 @@ export default function TaskModal({
     updateTask({ ...task, priority: priority })
   }
 
+  const { mutate: reorderTasks } = useMutation(
+    trpc.task.reorder.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readOne.queryKey({
+            id: collectionId,
+          }),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.task.today.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.inbox.queryKey(),
+        })
+      },
+    }),
+  )
+
+  const [draggableParentRef, draggableSubTasks, setValues] = useDragAndDrop<
+    HTMLDivElement,
+    TaskType
+  >([], {
+    dragHandle: '.drag-handle',
+    group: 'section',
+    onDragend: (data) => {
+      reorderTasks(
+        data.values.map((updatedSubTask, index) => ({
+          id: (updatedSubTask as TaskType).id,
+          position: index,
+          sectionId: task.sectionId,
+        })),
+      )
+    },
+  })
+  useEffect(() => {
+    if (task.children) {
+      setValues(task.children)
+    }
+  }, [task.children])
+
   return (
     <div className="flex h-[400px] max-w-[800px] flex-col">
       {/* header */}
@@ -249,8 +293,10 @@ export default function TaskModal({
               </button>
             )}
             {!isCollapsed && (
-              <div className="ml-2 flex flex-col gap-1">
-                {task.children?.map((subtask) => (
+              <div
+                ref={draggableParentRef}
+                className="ml-2 flex flex-col gap-1">
+                {draggableSubTasks.map((subtask) => (
                   <TaskListRow
                     key={subtask.id}
                     task={subtask}
