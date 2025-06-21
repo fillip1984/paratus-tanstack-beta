@@ -57,25 +57,23 @@ export const sectionRouter = createTRPCRouter({
         },
       })
     }),
-  // update: publicProcedure
-  //   .input(
-  //     z.object({
-  //       id: z.string().min(1),
-  //       name: z.string().min(1),
-  //       position: z.number(),
-  //     }),
-  //   )
-  //   .mutation(async ({ ctx, input }) => {
-  //     return await ctx.db.section.update({
-  //       where: {
-  //         id: input.id,
-  //       },
-  //       data: {
-  //         name: input.name,
-  //         position: input.position,
-  //       },
-  //     });
-  //   }),
+  update: publicProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        name: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.section.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+        },
+      })
+    }),
   delete: publicProcedure
     .input(
       z.object({

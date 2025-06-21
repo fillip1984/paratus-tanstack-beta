@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { startOfDay } from 'date-fns'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FaChevronDown, FaPlus, FaRegCheckCircle } from 'react-icons/fa'
 
 import { useAutoAnimate } from '@formkit/auto-animate/react'
@@ -212,6 +212,31 @@ const Section = ({
     setValues(section.tasks.filter((t) => !t.parentId))
   }, [section])
 
+  const [isEditingSection, setIsEditingSection] = useState(false)
+  const currentSectionNameRef = useRef<HTMLInputElement | null>(null)
+  const [currentSectionName, setCurrentSectionName] = useState(section.name)
+  const { mutate: updateSectionName } = useMutation(
+    trpc.section.update.mutationOptions({
+      onSuccess: async () => {
+        console.log('section updated')
+        setIsEditingSection(false)
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readAll.queryKey(),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.readOne.queryKey({
+            id: currentCollectionId,
+          }),
+        })
+      },
+    }),
+  )
+  useEffect(() => {
+    if (isEditingSection) {
+      currentSectionNameRef.current?.focus()
+    }
+  }, [isEditingSection])
+
   return (
     <div>
       {/* heading */}
@@ -229,15 +254,37 @@ const Section = ({
           </button>
         }
 
-        <div
-          className={`flex items-center gap-2 ${section.name === 'Uncategorized' ? 'text-gray-500' : section.name === 'Overdue' ? 'text-red-500' : ''} : ''}`}>
-          {section.name}
-          {section._count.tasks > 0 && (
-            <span className="text-xs text-gray-300">
-              {section._count.tasks}
+        {!isEditingSection ? (
+          <div
+            className={`flex items-center gap-2 ${section.name === 'Uncategorized' ? 'text-gray-500' : section.name === 'Overdue' ? 'text-red-500' : ''} : ''}`}>
+            <span
+              onClick={() => {
+                if (currentSectionName !== 'Uncategorized') {
+                  setIsEditingSection((prev) => !prev)
+                }
+              }}>
+              {currentSectionName}
             </span>
-          )}
-        </div>
+            {section._count.tasks > 0 && (
+              <span className="text-xs text-gray-300">
+                {section._count.tasks}
+              </span>
+            )}
+          </div>
+        ) : (
+          <div>
+            <input
+              type="text"
+              ref={currentSectionNameRef}
+              value={currentSectionName}
+              onChange={(e) => setCurrentSectionName(e.target.value)}
+              onBlur={() =>
+                updateSectionName({ id: section.id, name: currentSectionName })
+              }
+              className="rounded border p-1"
+            />
+          </div>
+        )}
       </div>
       {/* list */}
       <div ref={parent} className="ml-2 flex flex-1 flex-col gap-2">
