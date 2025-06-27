@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { set, startOfDay } from 'date-fns'
+import { startOfDay } from 'date-fns'
 import { useEffect, useRef, useState } from 'react'
 import {
   FaChevronDown,
