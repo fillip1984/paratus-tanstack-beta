@@ -3,6 +3,7 @@ import type { PriorityOption } from '@prisma/client'
 export type CollectionSummaryType = {
   id: string
   name: string
+  position: number
   taskCount: number
   sections: Array<SectionSummaryType>
 }
@@ -16,8 +17,7 @@ export type SectionSummaryType = {
 export type CollectionDetailType = {
   id: string
   name: string
-  // heading: string
-  // taskCount: number
+  position: number
   sections?: Array<SectionDetailType>
   // sections: (SectionDetailType & { sectionNature?: SectionNatureType })[];
 }

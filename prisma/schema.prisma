@@ -18,7 +18,7 @@ model Collection {
   name     String
   position Int
 
-  parent   Collection?  @relation("CollectionRelations", fields: [parentId], references: [id])
+  parent   Collection?  @relation("CollectionRelations", fields: [parentId], references: [id], onDelete: Cascade)
   parentId String?
   children Collection[] @relation("CollectionRelations")
 
@@ -35,7 +35,7 @@ model Section {
 
   tasks Task[]
 
-  collection   Collection @relation(fields: [collectionId], references: [id])
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   collectionId String
 }
 
@@ -56,7 +56,7 @@ model Task {
 
   comments Comment[]
 
-  parent   Task?   @relation("TaskRelations", fields: [parentId], references: [id])
+  parent   Task?   @relation("TaskRelations", fields: [parentId], references: [id], onDelete: Cascade)
   parentId String?
   children Task[]  @relation("TaskRelations")
 }
@@ -72,19 +72,6 @@ model Comment {
   task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId String
 }
-
-// model ChecklistItem {
-//   id        String   @id @default(cuid())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   text     String
-//   complete Boolean @default(false)
-//   position Int
-
-//   task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-//   taskId String
-// }
 
 enum PriorityOption {
   LOWEST

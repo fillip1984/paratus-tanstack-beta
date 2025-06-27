@@ -7,6 +7,7 @@ export const collectionRouter = createTRPCRouter({
       select: {
         id: true,
         name: true,
+        position: true,
         // parentId: true,
         // children: {
         //   select: {
@@ -51,6 +52,7 @@ export const collectionRouter = createTRPCRouter({
         select: {
           id: true,
           name: true,
+          position: true,
           sections: {
             orderBy: {
               position: 'asc',
