@@ -111,7 +111,8 @@ export default function SectionPicker({
       button={
         <button
           type="button"
-          className="bg-accent1 flex items-center gap-1 rounded px-2 py-1 text-[11px]">
+          className="bg-accent1 flex items-center gap-1 rounded px-2 py-1 text-[11px]"
+        >
           {sectionPickerValue?.label} <FaAngleDown />
         </button>
       }
@@ -122,7 +123,8 @@ export default function SectionPicker({
             <button
               type="button"
               onClick={() => setSectionPickerValue(inbox)}
-              className="hover:bg-accent1/50 flex w-full items-center gap-2 rounded px-2 py-1 text-xs">
+              className="hover:bg-accent1/50 flex w-full items-center gap-2 rounded px-2 py-1 text-xs"
+            >
               {inbox.label}
             </button>
           )}
@@ -142,7 +144,8 @@ export default function SectionPicker({
                             label: `# ${collection.name}`,
                           })
                         }
-                        className="hover:bg-accent1/50 flex w-full rounded px-2 py-1 text-xs">
+                        className="hover:bg-accent1/50 flex w-full rounded px-2 py-1 text-xs"
+                      >
                         # {collection.name}
                       </button>
                     ) : (
@@ -159,7 +162,8 @@ export default function SectionPicker({
                             ),
                           })
                         }
-                        className="hover:bg-accent1/50 ml-2 flex w-full items-center gap-2 rounded px-2 py-1 text-xs">
+                        className="hover:bg-accent1/50 ml-2 flex w-full items-center gap-2 rounded px-2 py-1 text-xs"
+                      >
                         <RxSection />
                         {section.name}
                       </button>
@@ -169,6 +173,7 @@ export default function SectionPicker({
               </div>
             ))}
         </div>
-      }></PopupMenu>
+      }
+    ></PopupMenu>
   )
 }

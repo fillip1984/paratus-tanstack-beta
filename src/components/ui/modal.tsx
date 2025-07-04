@@ -40,7 +40,8 @@ export default function Modal({
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0 }}
-          className="bg-foreground z-[1000] rounded-xl">
+          className="bg-foreground z-[1000] rounded-xl"
+        >
           {children}
         </motion.div>
       </div>

@@ -172,7 +172,8 @@ export default function CollectionView({
                   ) {
                     setIsEditingCollection((prev) => !prev)
                   }
-                }}>
+                }}
+              >
                 {collection.name}
               </h2>
             ) : (
@@ -207,7 +208,8 @@ export default function CollectionView({
                   className="flex cursor-pointer items-center gap-2 rounded p-1 text-white hover:bg-white/10"
                   onClick={() =>
                     setIsDeleteCollectionConfirmationOpen((prev) => !prev)
-                  }>
+                  }
+                >
                   <FaTrash className="text-danger flex-shrink-0" /> Delete
                 </span>
               </div>
@@ -218,7 +220,8 @@ export default function CollectionView({
         <div
           ref={parentRef}
           data-label={collection.id}
-          className="flex flex-col gap-6">
+          className="flex flex-col gap-6"
+        >
           {draggableSections.map((section) => (
             <Section
               key={section.id}
@@ -234,7 +237,8 @@ export default function CollectionView({
         {!isAddSectionOpen ? (
           <button
             onClick={() => setIsAddSectionOpen((prev) => !prev)}
-            className="flex items-center gap-2 p-2">
+            className="flex items-center gap-2 p-2"
+          >
             <RxSection className="text-primary" />
             <span className="">Add section</span>
           </button>
@@ -250,7 +254,8 @@ export default function CollectionView({
             <div className="flex gap-2">
               <button
                 onClick={() => setIsAddSectionOpen((prev) => !prev)}
-                className="button-secondary">
+                className="button-secondary"
+              >
                 Cancel
               </button>
               <button
@@ -260,7 +265,8 @@ export default function CollectionView({
                     name: sectionName,
                   })
                 }
-                className="button-primary">
+                className="button-primary"
+              >
                 Add
               </button>
             </div>
@@ -270,7 +276,8 @@ export default function CollectionView({
 
       <Modal
         isOpen={isDeleteCollectionConfirmationOpen}
-        close={() => setIsDeleteCollectionConfirmationOpen(false)}>
+        close={() => setIsDeleteCollectionConfirmationOpen(false)}
+      >
         <div className="bg-foreground rounded-xl p-2">
           <h3 className="text-danger">Are you sure?</h3>
           <p>
@@ -281,13 +288,15 @@ export default function CollectionView({
             <button
               type="button"
               onClick={() => deleteCollection({ id: collection.id })}
-              className="button-primary bg-danger">
+              className="button-primary bg-danger"
+            >
               Delete
             </button>
             <button
               type="button"
               onClick={() => setIsDeleteCollectionConfirmationOpen(false)}
-              className="button-secondary">
+              className="button-secondary"
+            >
               Cancel
             </button>
           </div>
@@ -431,13 +440,15 @@ const Section = ({
         <div className="flex-1">
           {!isEditingSection ? (
             <div
-              className={`flex items-center gap-2 ${section.name === 'Uncategorized' ? 'text-gray-500' : section.name === 'Overdue' ? 'text-red-500' : ''} : ''}`}>
+              className={`flex items-center gap-2 ${section.name === 'Uncategorized' ? 'text-gray-500' : section.name === 'Overdue' ? 'text-red-500' : ''} : ''}`}
+            >
               <span
                 onClick={() => {
                   if (currentSectionName !== 'Uncategorized') {
                     setIsEditingSection((prev) => !prev)
                   }
-                }}>
+                }}
+              >
                 {currentSectionName}
               </span>
               {section._count.tasks > 0 && (
@@ -477,7 +488,8 @@ const Section = ({
                   className="flex cursor-pointer items-center gap-2 rounded p-1 text-white hover:bg-white/10"
                   onClick={() =>
                     setIsDeleteSectionConfirmationOpen((prev) => !prev)
-                  }>
+                  }
+                >
                   <FaTrash className="text-danger flex-shrink-0" /> Delete
                 </span>
               </div>
@@ -512,7 +524,8 @@ const Section = ({
                   <button
                     type="button"
                     onClick={() => setIsAddTaskOpen((prev) => !prev)}
-                    className="flex items-center gap-2 rounded p-1 font-thin hover:bg-white/10">
+                    className="flex items-center gap-2 rounded p-1 font-thin hover:bg-white/10"
+                  >
                     <FaPlus className="text-primary" /> Add task
                   </button>
                 )}
@@ -524,7 +537,8 @@ const Section = ({
 
       <Modal
         isOpen={isDeleteSectionConfirmationOpen}
-        close={() => setIsDeleteSectionConfirmationOpen(false)}>
+        close={() => setIsDeleteSectionConfirmationOpen(false)}
+      >
         <div className="bg-foreground rounded-xl p-2">
           <h3 className="text-danger">Are you sure?</h3>
           <p>
@@ -535,13 +549,15 @@ const Section = ({
             <button
               type="button"
               onClick={() => deleteSection({ id: section.id })}
-              className="button-primary bg-danger">
+              className="button-primary bg-danger"
+            >
               Delete
             </button>
             <button
               type="button"
               onClick={() => setIsDeleteSectionConfirmationOpen(false)}
-              className="button-secondary">
+              className="button-secondary"
+            >
               Cancel
             </button>
           </div>

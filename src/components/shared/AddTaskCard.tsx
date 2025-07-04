@@ -91,7 +91,8 @@ export default function AddTaskCard({
     <form
       onSubmit={handleSubmit}
       className="flex flex-col rounded-xl border border-white/30 bg-white/5"
-      ref={formRef}>
+      ref={formRef}
+    >
       <div className="flex flex-col p-2">
         <input
           type="text"
@@ -104,7 +105,8 @@ export default function AddTaskCard({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description"
-          className="m-0 border-0 bg-inherit p-0 text-xs"></TextareaAutosize>
+          className="m-0 border-0 bg-inherit p-0 text-xs"
+        ></TextareaAutosize>
         <div className="flex items-center gap-2">
           <DatePicker value={dueDate} setValue={setDueDate} />
           <PriorityPicker value={priority} setValue={setPriority} />
@@ -128,13 +130,15 @@ export default function AddTaskCard({
           <button
             type="button"
             onClick={dismiss}
-            className="border-secondary text-secondary rounded border px-2 py-1 opacity-80 hover:opacity-100">
+            className="border-secondary text-secondary rounded border px-2 py-1 opacity-80 hover:opacity-100"
+          >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!isFormValid}
-            className="bg-primary rounded px-2 py-1">
+            className="bg-primary rounded px-2 py-1"
+          >
             Add
           </button>
         </div>

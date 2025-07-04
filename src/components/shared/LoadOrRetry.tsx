@@ -23,7 +23,8 @@ export default function LoadOrRetry({
             <button
               type="button"
               onClick={retry}
-              className="mt-1 w-full rounded bg-slate-400 px-4 py-2 text-3xl">
+              className="mt-1 w-full rounded bg-slate-400 px-4 py-2 text-3xl"
+            >
               Retry
             </button>
           </div>

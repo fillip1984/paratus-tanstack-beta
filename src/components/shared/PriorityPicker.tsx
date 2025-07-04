@@ -65,7 +65,8 @@ export default function PriorityPicker({
       button={
         <button
           type="button"
-          className="flex items-center gap-2 rounded border border-white/30 px-2 py-1 text-sm text-white/60">
+          className="flex items-center gap-2 rounded border border-white/30 px-2 py-1 text-sm text-white/60"
+        >
           {priorityPickerValue?.value ? (
             <span className="flex items-center gap-2 text-xs">
               {priorityPickerValue.icon} {priorityPickerValue.shortLabel}
@@ -74,7 +75,8 @@ export default function PriorityPicker({
                   setPriorityPickerValue(null)
                   setValue(null)
                 }}
-                className="text-danger ml-1 text-sm">
+                className="text-danger ml-1 text-sm"
+              >
                 X
               </span>
             </span>
@@ -92,7 +94,8 @@ export default function PriorityPicker({
               key={p.value}
               type="button"
               onClick={() => handleUpdate(p)}
-              className="hover:bg-accent1/50 flex items-center gap-2 rounded p-2 text-xs">
+              className="hover:bg-accent1/50 flex items-center gap-2 rounded p-2 text-xs"
+            >
               {p.icon} {p.label}
             </button>
           ))}

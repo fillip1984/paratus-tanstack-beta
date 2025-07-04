@@ -84,7 +84,8 @@ export default function DatePicker({
         button={
           <button
             type="button"
-            className="flex items-center gap-2 rounded border border-white/30 px-2 py-1 text-sm text-white/60">
+            className="flex items-center gap-2 rounded border border-white/30 px-2 py-1 text-sm text-white/60"
+          >
             {datePickerValue && datePickerValue.value ? (
               <span className="flex items-center gap-2">
                 {datePickerValue.icon}
@@ -99,7 +100,8 @@ export default function DatePicker({
                     setDatePickerValue(null)
                     setValue(null)
                   }}
-                  className="text-danger ml-2 text-sm">
+                  className="text-danger ml-2 text-sm"
+                >
                   X
                 </span>
               </span>
@@ -126,7 +128,8 @@ export default function DatePicker({
                     key={d.value.toString()}
                     type="button"
                     onClick={() => handleUpdate(d)}
-                    className="hover:bg-accent1/50 flex items-center gap-2 rounded p-1 text-xs">
+                    className="hover:bg-accent1/50 flex items-center gap-2 rounded p-1 text-xs"
+                  >
                     {d.icon} {d.label}
                     <span className="ml-auto">
                       {d.label === 'Today' ||

@@ -37,7 +37,8 @@ export default function PopupMenu({
           e.preventDefault()
           setIsOpen((prev) => !prev)
         }}
-        className="cursor-pointer">
+        className="cursor-pointer"
+      >
         {button}
       </div>
 
@@ -48,7 +49,8 @@ export default function PopupMenu({
             e.stopPropagation()
             e.preventDefault()
             setIsOpen(false)
-          }}>
+          }}
+        >
           {content}
         </div>
       )}

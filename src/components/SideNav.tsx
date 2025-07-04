@@ -91,7 +91,8 @@ export default function SideNav() {
           <Link
             key={item.to}
             to={item.to}
-            className={`[&.active]:text-primary [&.active]:bg-background hover:bg-background/60 mx-2 flex items-center rounded-xl p-2 transition duration-200 select-none`}>
+            className={`[&.active]:text-primary [&.active]:bg-background hover:bg-background/60 mx-2 flex items-center rounded-xl p-2 transition duration-200 select-none`}
+          >
             <item.icon className="mr-2" />
             {item.label}
             {item.count}
@@ -102,7 +103,8 @@ export default function SideNav() {
           <h4>Collections</h4>
           <button
             onClick={() => setIsAddCollectionOpen(true)}
-            className="text-primary">
+            className="text-primary"
+          >
             <FaPlus />
           </button>
         </div>
@@ -113,7 +115,8 @@ export default function SideNav() {
               params={{ collectionId: collection.id }}
               key={collection.id}
               data-label={collection.id}
-              className={`[&.active]:text-primary [&.active]:bg-background hover:bg-background/60 mx-2 flex items-center justify-between rounded-xl p-2 transition duration-200 select-none`}>
+              className={`[&.active]:text-primary [&.active]:bg-background hover:bg-background/60 mx-2 flex items-center justify-between rounded-xl p-2 transition duration-200 select-none`}
+            >
               <span># {collection.name}</span>
               <span className="text-xs text-gray-300">
                 {collection.taskCount > 0 && collection.taskCount}
@@ -174,7 +177,8 @@ const AddCollectionModal = ({
     <Modal isOpen={isOpen} close={close}>
       <form
         onSubmit={handleCreateCollection}
-        className="bg-foreground flex h-full w-full flex-col rounded-lg text-white">
+        className="bg-foreground flex h-full w-full flex-col rounded-lg text-white"
+      >
         <div className="flex items-center justify-between border-b border-b-white/30 px-4 py-1">
           <h4>Add collection</h4>
           <button type="button" onClick={close} className="text-primary">

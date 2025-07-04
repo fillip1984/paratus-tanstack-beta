@@ -205,7 +205,8 @@ export default function TaskModal({
               <div className="flex w-[100px] flex-col gap-1 p-1">
                 <span
                   className="flex cursor-pointer items-center gap-2 rounded p-1 text-white hover:bg-white/10"
-                  onClick={() => deleteTask({ id: task.id })}>
+                  onClick={() => deleteTask({ id: task.id })}
+                >
                   <FaTrash className="text-danger flex-shrink-0" /> Delete
                 </span>
               </div>
@@ -243,18 +244,21 @@ export default function TaskModal({
                     onChange={(e) => setDescription(e.target.value)}
                     ref={descriptionEditingRef}
                     placeholder="Description..."
-                    className="text-muted m-0 border-0 bg-inherit p-0 text-xs"></TextareaAutosize>
+                    className="text-muted m-0 border-0 bg-inherit p-0 text-xs"
+                  ></TextareaAutosize>
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
                       className="button-secondary button-compact"
-                      onClick={() => setIsEditingTextOrDescriptionTarget('')}>
+                      onClick={() => setIsEditingTextOrDescriptionTarget('')}
+                    >
                       Cancel
                     </button>
                     <button
                       type="button"
                       className="button-primary button-compact"
-                      onClick={handleUpdateTextAndDescription}>
+                      onClick={handleUpdateTextAndDescription}
+                    >
                       Save
                     </button>
                   </div>
@@ -262,14 +266,16 @@ export default function TaskModal({
               ) : (
                 <div className="flex flex-1 flex-col">
                   <span
-                    onClick={() => setIsEditingTextOrDescriptionTarget('text')}>
+                    onClick={() => setIsEditingTextOrDescriptionTarget('text')}
+                  >
                     {text}
                   </span>
                   <span
                     onClick={() =>
                       setIsEditingTextOrDescriptionTarget('description')
                     }
-                    className="text-muted m-0 border-0 bg-inherit p-0 text-xs">
+                    className="text-muted m-0 border-0 bg-inherit p-0 text-xs"
+                  >
                     {description.length > 0 ? description : 'Description...'}
                   </span>
                 </div>
@@ -281,7 +287,8 @@ export default function TaskModal({
               <button
                 type="button"
                 onClick={() => setIsCollapsed((prev) => !prev)}
-                className="flex items-center gap-1">
+                className="flex items-center gap-1"
+              >
                 <FaChevronDown
                   className={`transition ${isCollapsed ? '-rotate-90' : ''}`}
                 />
@@ -295,7 +302,8 @@ export default function TaskModal({
             {!isCollapsed && (
               <div
                 ref={draggableParentRef}
-                className="ml-2 flex flex-col gap-1">
+                className="ml-2 flex flex-col gap-1"
+              >
                 {draggableSubTasks.map((subtask) => (
                   <TaskListRow
                     key={subtask.id}
@@ -318,7 +326,8 @@ export default function TaskModal({
                 <button
                   type="button"
                   onClick={() => setIsAddingSubTask((prev) => !prev)}
-                  className="flex w-fit items-center gap-2 rounded p-1 text-sm hover:bg-white/30">
+                  className="flex w-fit items-center gap-2 rounded p-1 text-sm hover:bg-white/30"
+                >
                   <FaPlus /> Add sub-task
                 </button>
               )}

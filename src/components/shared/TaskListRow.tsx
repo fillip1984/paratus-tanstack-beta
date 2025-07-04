@@ -73,7 +73,8 @@ export default function TaskRow({
             />
             <div onClick={handleTaskModal} className="flex flex-1 flex-col">
               <span
-                className={`text-sm ${task.complete ? 'line-through' : ''}`}>
+                className={`text-sm ${task.complete ? 'line-through' : ''}`}
+              >
                 {task.text}
               </span>
               <span className="text-xs">{task.description}</span>
