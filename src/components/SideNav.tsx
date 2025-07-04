@@ -10,9 +10,9 @@ import {
   FaPlus,
   FaX,
 } from 'react-icons/fa6'
-import Modal from './ui/modal'
-import type { CollectionSummaryType } from '@/integrations/trpc/types'
 import { useTRPC } from '@/integrations/trpc/react'
+import type { CollectionSummaryType } from '@/integrations/trpc/types'
+import Modal from './ui/modal'
 
 export default function SideNav() {
   const trpc = useTRPC()

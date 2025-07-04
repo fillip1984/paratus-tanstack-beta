@@ -1,6 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { isSameDay, startOfDay } from 'date-fns'
+import {
+  eachDayOfInterval,
+  nextSaturday,
+  previousSunday,
+  startOfDay,
+} from 'date-fns'
+import { useState } from 'react'
 import CollectionView from '@/components/CollectionView'
 import { useTRPC } from '@/integrations/trpc/react'
 import type {
@@ -8,18 +14,21 @@ import type {
   SectionDetailType,
 } from '@/integrations/trpc/types'
 
-export const Route = createFileRoute('/today')({
+export const Route = createFileRoute('/upcoming')({
   component: RouteComponent,
-  // loader: async ({ context }) => {
-  //   await context.queryClient.fetchQuery(
-  //     context.trpc.task.readAll.queryOptions(),
-  //   )
-  // },
 })
 
 function RouteComponent() {
+  const [today] = useState(new Date())
+  const [lastSunday] = useState(previousSunday(today))
+  const [upcomingSaturday] = useState(nextSaturday(today))
+  const [week] = useState(
+    eachDayOfInterval({ start: lastSunday, end: upcomingSaturday }),
+  )
+
   const trpc = useTRPC()
   const { data: tasks } = useQuery(trpc.task.today.queryOptions())
+
   const overdueSection: SectionDetailType = {
     id: 'overdue',
     name: 'Overdue',
@@ -34,23 +43,13 @@ function RouteComponent() {
       tasks: tasks?.length ?? 0,
     },
   }
-  const todaySection: SectionDetailType = {
-    id: 'today',
-    name: 'Jun 1 - Today - Sunday',
-    position: 1,
-    tasks:
-      tasks?.filter(
-        (task) => task.dueDate && isSameDay(task.dueDate, new Date()),
-      ) ?? [],
-    _count: {
-      tasks: tasks?.length ?? 0,
-    },
-  }
-  const today = {
-    name: 'Today',
-    id: 'today',
-    sections: [overdueSection, todaySection],
-  } as CollectionDetailType
 
-  return <CollectionView collection={{ ...today, name: 'Today' }} />
+  const upcoming = {
+    name: 'Upcoming',
+    id: 'upcoming',
+    sections: [overdueSection],
+    position: -1,
+  } satisfies CollectionDetailType
+
+  return <CollectionView collection={upcoming} />
 }

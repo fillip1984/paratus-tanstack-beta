@@ -1,4 +1,7 @@
+import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { useDragAndDrop } from '@formkit/drag-and-drop/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { startOfDay } from 'date-fns'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -7,22 +10,18 @@ import {
   FaRegCheckCircle,
   FaTrash,
 } from 'react-icons/fa'
-
-import { useAutoAnimate } from '@formkit/auto-animate/react'
-import { useDragAndDrop } from '@formkit/drag-and-drop/react'
-import { RxDragHandleDots2, RxSection } from 'react-icons/rx'
 import { FaEllipsis } from 'react-icons/fa6'
-import { useNavigate } from '@tanstack/react-router'
-import AddTaskCard from './shared/AddTaskCard'
-import TaskListRow from './shared/TaskListRow'
-import PopupMenu from './ui/popupMenu'
-import Modal from './ui/modal'
+import { RxDragHandleDots2, RxSection } from 'react-icons/rx'
+import { useTRPC } from '@/integrations/trpc/react'
 import type {
   CollectionDetailType,
   SectionDetailType,
   TaskType,
 } from '@/integrations/trpc/types'
-import { useTRPC } from '@/integrations/trpc/react'
+import AddTaskCard from './shared/AddTaskCard'
+import TaskListRow from './shared/TaskListRow'
+import Modal from './ui/modal'
+import PopupMenu from './ui/popupMenu'
 
 export default function CollectionView({
   collection,

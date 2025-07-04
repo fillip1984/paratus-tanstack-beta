@@ -11,12 +11,19 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as UpcomingImport } from './routes/upcoming'
 import { Route as TodayImport } from './routes/today'
 import { Route as InboxImport } from './routes/inbox'
 import { Route as IndexImport } from './routes/index'
 import { Route as CollectionsCollectionIdImport } from './routes/collections.$collectionId'
 
 // Create/Update Routes
+
+const UpcomingRoute = UpcomingImport.update({
+  id: '/upcoming',
+  path: '/upcoming',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const TodayRoute = TodayImport.update({
   id: '/today',
@@ -67,6 +74,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TodayImport
       parentRoute: typeof rootRoute
     }
+    '/upcoming': {
+      id: '/upcoming'
+      path: '/upcoming'
+      fullPath: '/upcoming'
+      preLoaderRoute: typeof UpcomingImport
+      parentRoute: typeof rootRoute
+    }
     '/collections/$collectionId': {
       id: '/collections/$collectionId'
       path: '/collections/$collectionId'
@@ -83,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/inbox': typeof InboxRoute
   '/today': typeof TodayRoute
+  '/upcoming': typeof UpcomingRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
 }
 
@@ -90,6 +105,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/inbox': typeof InboxRoute
   '/today': typeof TodayRoute
+  '/upcoming': typeof UpcomingRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
 }
 
@@ -98,15 +114,27 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/inbox': typeof InboxRoute
   '/today': typeof TodayRoute
+  '/upcoming': typeof UpcomingRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inbox' | '/today' | '/collections/$collectionId'
+  fullPaths:
+    | '/'
+    | '/inbox'
+    | '/today'
+    | '/upcoming'
+    | '/collections/$collectionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/inbox' | '/today' | '/collections/$collectionId'
-  id: '__root__' | '/' | '/inbox' | '/today' | '/collections/$collectionId'
+  to: '/' | '/inbox' | '/today' | '/upcoming' | '/collections/$collectionId'
+  id:
+    | '__root__'
+    | '/'
+    | '/inbox'
+    | '/today'
+    | '/upcoming'
+    | '/collections/$collectionId'
   fileRoutesById: FileRoutesById
 }
 
@@ -114,6 +142,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   InboxRoute: typeof InboxRoute
   TodayRoute: typeof TodayRoute
+  UpcomingRoute: typeof UpcomingRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
 }
 
@@ -121,6 +150,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   InboxRoute: InboxRoute,
   TodayRoute: TodayRoute,
+  UpcomingRoute: UpcomingRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
 }
 
@@ -137,6 +167,7 @@ export const routeTree = rootRoute
         "/",
         "/inbox",
         "/today",
+        "/upcoming",
         "/collections/$collectionId"
       ]
     },
@@ -148,6 +179,9 @@ export const routeTree = rootRoute
     },
     "/today": {
       "filePath": "today.tsx"
+    },
+    "/upcoming": {
+      "filePath": "upcoming.tsx"
     },
     "/collections/$collectionId": {
       "filePath": "collections.$collectionId.tsx"
