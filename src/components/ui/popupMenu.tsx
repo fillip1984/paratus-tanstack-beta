@@ -27,7 +27,7 @@ export default function PopupMenu({
     return () => {
       document.removeEventListener('click', handleClick)
     }
-  }, [dropdownRef])
+  }, [])
 
   return (
     <div className="relative" ref={dropdownRef}>

@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import type { CollectionDetailType } from '@/integrations/trpc/types'
 import CollectionView from '@/components/CollectionView'
 import { useTRPC } from '@/integrations/trpc/react'
+import type { CollectionDetailType } from '@/integrations/trpc/types'
 
 export const Route = createFileRoute('/inbox')({
   component: RouteComponent,

@@ -53,7 +53,7 @@ export default function PriorityPicker({
       const foundPriority = priorities.find((p) => p.value === value)
       setPriorityPickerValue(foundPriority ?? null)
     }
-  }, [value])
+  }, [value, priorityPickerValue?.value])
 
   const handleUpdate = (newValue: PriorityType) => {
     setPriorityPickerValue(newValue)

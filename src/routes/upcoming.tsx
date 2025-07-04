@@ -22,7 +22,7 @@ function RouteComponent() {
   const [today] = useState(new Date())
   const [lastSunday] = useState(previousSunday(today))
   const [upcomingSaturday] = useState(nextSaturday(today))
-  const [week] = useState(
+  const [_week] = useState(
     eachDayOfInterval({ start: lastSunday, end: upcomingSaturday }),
   )
 

@@ -1,12 +1,12 @@
+import type { PriorityOption } from '@prisma/client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
+import { useTRPC } from '@/integrations/trpc/react'
 import DatePicker from './DatePicker'
 import PriorityPicker from './PriorityPicker'
 import SectionPicker from './SectionPicker'
-import type { FormEvent } from 'react'
-import type { PriorityOption } from '@prisma/client'
-import { useTRPC } from '@/integrations/trpc/react'
 
 export default function AddTaskCard({
   currentCollectionId,

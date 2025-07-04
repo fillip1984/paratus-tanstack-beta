@@ -1,15 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { RxDragHandleDots2 } from 'react-icons/rx'
 import { CgListTree } from 'react-icons/cg'
+import { RxDragHandleDots2 } from 'react-icons/rx'
 import { TbProgressCheck } from 'react-icons/tb'
+import { useTRPC } from '@/integrations/trpc/react'
+import type { TaskType } from '@/integrations/trpc/types'
 import TaskModal from '../TaskModal'
 import Modal from '../ui/modal'
 import DatePicker from './DatePicker'
 import PriorityPicker from './PriorityPicker'
 import SectionPicker from './SectionPicker'
-import type { TaskType } from '@/integrations/trpc/types'
-import { useTRPC } from '@/integrations/trpc/react'
 
 export default function TaskRow({
   task,

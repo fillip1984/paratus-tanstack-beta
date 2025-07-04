@@ -73,7 +73,7 @@ export default function SideNav() {
         ) as Array<CollectionSummaryType>,
       )
     }
-  }, [collections])
+  }, [collections, setValues])
   const { mutate: reorderCollections } = useMutation(
     trpc.collection.reorder.mutationOptions({
       onSuccess: async () => {

@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { useTRPC } from '@/integrations/trpc/react'
 import LoadOrRetry from '@/components/shared/LoadOrRetry'
+import { useTRPC } from '@/integrations/trpc/react'
 
 // TODO: need to figure out a place to run initializeCollections... for now doing it here
 export const Route = createFileRoute('/')({
@@ -22,7 +22,7 @@ function RouteComponent() {
     if (isLoading) {
       navigator({ to: '/today' })
     }
-  }, [isLoading])
+  }, [isLoading, navigator])
 
   return (
     <LoadOrRetry isLoading={isLoading} isError={isError} retry={retry} />

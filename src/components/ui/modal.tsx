@@ -1,6 +1,6 @@
+import { scrollbarWidth } from '@xobotyi/scrollbar-width'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
-import { scrollbarWidth } from '@xobotyi/scrollbar-width'
 
 export default function Modal({
   isOpen,

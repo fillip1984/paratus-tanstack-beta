@@ -98,7 +98,7 @@ export default function CollectionView({
     if (collection.sections) {
       setValues(collection.sections)
     }
-  }, [collection])
+  }, [collection, setValues])
 
   const [isEditingCollection, setIsEditingCollection] = useState(false)
   const currentCollectionNameRef = useRef<HTMLInputElement | null>(null)
@@ -192,7 +192,7 @@ export default function CollectionView({
             )}
             <span className="flex items-center gap-2 text-sm font-thin">
               <FaRegCheckCircle />
-              {collection.sections?.map((s) => s.tasks).flat(1).length} tasks
+              {collection.sections?.flatMap((s) => s.tasks).length} tasks
             </span>
           </div>
           <PopupMenu
@@ -320,7 +320,7 @@ const Section = ({
   const [parent, enableAnimations] = useAutoAnimate()
   useEffect(() => {
     enableAnimations(!isCollapsed)
-  }, [isCollapsed])
+  }, [isCollapsed, enableAnimations])
 
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -351,7 +351,7 @@ const Section = ({
     dragHandle: '.drag-handle',
     group: 'section',
     onDragend: (data) => {
-      const sectionId = data.parent.el.dataset['label']
+      const sectionId = data.parent.el.dataset.label
       if (!sectionId) {
         console.error('No sectionId found for reorder')
         return
@@ -368,7 +368,7 @@ const Section = ({
   useEffect(() => {
     // console.log('setting values for section', section.id)
     setValues(section.tasks.filter((t) => !t.parentId))
-  }, [section])
+  }, [section, setValues])
 
   const [isEditingSection, setIsEditingSection] = useState(false)
   const currentSectionNameRef = useRef<HTMLInputElement | null>(null)

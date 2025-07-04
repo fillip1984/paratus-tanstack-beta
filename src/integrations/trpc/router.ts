@@ -1,6 +1,5 @@
 // import { TRPCError } from '@trpc/server'
 import { createTRPCRouter } from './init'
-import { checklistItemRouter } from './routers/checklistItem'
 import { collectionRouter } from './routers/collection'
 import { commentRouter } from './routers/comment'
 import { sectionRouter } from './routers/section'
@@ -15,7 +14,6 @@ export const trpcRouter = createTRPCRouter({
   collection: collectionRouter,
   section: sectionRouter,
   task: taskRouter,
-  checklistItem: checklistItemRouter,
   comment: commentRouter,
 })
 export type TRPCRouter = typeof trpcRouter

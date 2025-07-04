@@ -1,19 +1,17 @@
+import type { QueryClient } from '@tanstack/react-query'
 import {
+  createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
-  createRootRouteWithContext,
 } from '@tanstack/react-router'
-
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import appCss from '../styles.css?url'
-
-import TanStackQueryLayout from '../integrations/tanstack-query/layout.tsx'
-import type { QueryClient } from '@tanstack/react-query'
-
-import type { TRPCRouter } from '@/integrations/trpc/router'
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query'
 import SideNav from '@/components/SideNav.tsx'
+
+import type { TRPCRouter } from '@/integrations/trpc/router'
+import TanStackQueryLayout from '../integrations/tanstack-query/layout.tsx'
+import appCss from '../styles.css?url'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -68,9 +66,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
         <div className="flex flex-1">
           <Outlet />
-          {/* <TanStackRouterDevtools  /> */}
+          <TanStackRouterDevtools />
 
-          {/* <TanStackQueryLayout /> */}
+          <TanStackQueryLayout />
         </div>
       </div>
     </RootDocument>

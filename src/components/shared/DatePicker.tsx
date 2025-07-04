@@ -13,8 +13,8 @@ import { useEffect, useState } from 'react'
 import { CgCalendarNext } from 'react-icons/cg'
 import { FaCalendarAlt, FaCalendarDay, FaSun } from 'react-icons/fa'
 import { MdOutlineWeekend } from 'react-icons/md'
-import PopupMenu from '../ui/popupMenu'
 import { capitalizeFirstLetter } from '@/utils/String'
+import PopupMenu from '../ui/popupMenu'
 
 type DateType = {
   label: string
@@ -72,7 +72,7 @@ export default function DatePicker({
       }
       setDatePickerValue(foundDueDate)
     }
-  }, [value])
+  }, [value, datePickerValue?.value])
 
   const handleUpdate = (date: DateType) => {
     setDatePickerValue(date)
@@ -86,7 +86,7 @@ export default function DatePicker({
             type="button"
             className="flex items-center gap-2 rounded border border-white/30 px-2 py-1 text-sm text-white/60"
           >
-            {datePickerValue && datePickerValue.value ? (
+            {datePickerValue?.value ? (
               <span className="flex items-center gap-2">
                 {datePickerValue.icon}
                 {/* See why the split('at')...: https://github.com/date-fns/date-fns/issues/1218 */}

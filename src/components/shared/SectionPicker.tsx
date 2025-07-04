@@ -2,8 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { FaAngleDown, FaInbox } from 'react-icons/fa'
 import { RxSection } from 'react-icons/rx'
-import PopupMenu from '../ui/popupMenu'
 import { useTRPC } from '@/integrations/trpc/react'
+import type {
+  CollectionSummaryType,
+  SectionSummaryType,
+} from '@/integrations/trpc/types'
+import PopupMenu from '../ui/popupMenu'
 
 type SectionPickerType = {
   label: React.ReactNode
@@ -46,7 +50,7 @@ export default function SectionPicker({
         }
       }
     }
-  }, [collections])
+  }, [collections, inbox])
   useEffect(() => {
     // wait for collections and inbox to be fetched and set
     if (!collections || !inbox) return
@@ -61,8 +65,8 @@ export default function SectionPicker({
       return
     }
 
-    let collection: any
-    let section: any
+    let collection: CollectionSummaryType | undefined
+    let section: SectionSummaryType | undefined
     collections.forEach((c) => {
       const result = c.sections.find((s) => s.id === value)
       if (result) {
@@ -105,7 +109,7 @@ export default function SectionPicker({
       // console.log("only update section if there's a change in the value")
       setValue(sectionPickerValue.value)
     }
-  }, [sectionPickerValue])
+  }, [sectionPickerValue, sectionPickerValue?.value, setValue, value])
   return (
     <PopupMenu
       button={

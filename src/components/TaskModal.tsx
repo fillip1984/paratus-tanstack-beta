@@ -37,7 +37,7 @@ export default function TaskModal({
   const [parent, enableAnimations] = useAutoAnimate()
   useEffect(() => {
     enableAnimations(!isCollapsed)
-  }, [isCollapsed])
+  }, [isCollapsed, enableAnimations])
 
   useEffect(() => {
     setText(task.text)
@@ -173,7 +173,7 @@ export default function TaskModal({
     if (task.children) {
       setValues(task.children)
     }
-  }, [task.children])
+  }, [task.children, setValues])
 
   return (
     <div className="flex h-[400px] max-w-[800px] flex-col">
