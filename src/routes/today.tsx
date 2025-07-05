@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { isSameDay, startOfDay } from 'date-fns'
+import { format, isSameDay, startOfDay } from 'date-fns'
 import CollectionView from '@/components/CollectionView'
 import { useTRPC } from '@/integrations/trpc/react'
 import type {
@@ -36,7 +36,7 @@ function RouteComponent() {
   }
   const todaySection: SectionDetailType = {
     id: 'today',
-    name: 'Jun 1 - Today - Sunday',
+    name: format(new Date(), "MMM do '- Today - ' EEEE"),
     position: 1,
     tasks:
       tasks?.filter(
