@@ -2,7 +2,7 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useDragAndDrop } from '@formkit/drag-and-drop/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { startOfDay } from 'date-fns'
+import { format, startOfDay } from 'date-fns'
 import { useEffect, useRef, useState } from 'react'
 import {
   FaChevronDown,
@@ -85,6 +85,7 @@ export default function CollectionView({
   >([], {
     dragHandle: '.drag-handle',
     group: 'collection',
+    disabled: collection.name === 'Today' || collection.name === 'Upcoming',
     onDragend: (data) => {
       reorderSections(
         data.values.map((section, index) => ({
@@ -156,6 +157,9 @@ export default function CollectionView({
     }),
   )
 
+  const [topVisibleSection, setTopVisibleSection] =
+    useState<SectionDetailType>()
+
   return (
     <>
       <div className="container-centered">
@@ -216,6 +220,16 @@ export default function CollectionView({
           />
         </div>
 
+        {collection.name === 'Upcoming' && (
+          <div className="sticky top-0 z-10 bg-background border-b border-white/30">
+            <Calendar
+              sections={collection.sections}
+              topVisibleSection={topVisibleSection}
+              setTopVisibleSection={setTopVisibleSection}
+            />
+          </div>
+        )}
+
         <div
           ref={parentRef}
           data-label={collection.id}
@@ -233,42 +247,47 @@ export default function CollectionView({
             />
           ))}
         </div>
-        {!isAddSectionOpen ? (
-          <button
-            onClick={() => setIsAddSectionOpen((prev) => !prev)}
-            className="flex items-center gap-2 p-2"
-          >
-            <RxSection className="text-primary" />
-            <span className="">Add section</span>
-          </button>
-        ) : (
-          <div className="flex flex-col gap-1">
-            <input
-              type="text"
-              value={sectionName}
-              onChange={(e) => setSectionName(e.target.value)}
-              ref={addSectionRef}
-              placeholder="Name of section..."
-            />
-            <div className="flex gap-2">
+
+        {collection.name !== 'Today' && collection.name !== 'Upcoming' && (
+          <div>
+            {!isAddSectionOpen ? (
               <button
                 onClick={() => setIsAddSectionOpen((prev) => !prev)}
-                className="button-secondary"
+                className="flex items-center gap-2 p-2"
               >
-                Cancel
+                <RxSection className="text-primary" />
+                <span className="">Add section</span>
               </button>
-              <button
-                onClick={() =>
-                  createSection({
-                    collectionId: collection.id,
-                    name: sectionName,
-                  })
-                }
-                className="button-primary"
-              >
-                Add
-              </button>
-            </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <input
+                  type="text"
+                  value={sectionName}
+                  onChange={(e) => setSectionName(e.target.value)}
+                  ref={addSectionRef}
+                  placeholder="Name of section..."
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsAddSectionOpen((prev) => !prev)}
+                    className="button-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() =>
+                      createSection({
+                        collectionId: collection.id,
+                        name: sectionName,
+                      })
+                    }
+                    className="button-primary"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -424,7 +443,10 @@ const Section = ({
     <div>
       {/* heading */}
       <div className="flex items-center gap-2 border-b-1 border-b-white/30 py-2">
-        {section.name !== 'Overdue' && section.name !== 'Uncategorized' ? (
+        {section.name !== 'Overdue' &&
+        section.name !== 'Uncategorized' &&
+        currentCollectionId !== 'Today' &&
+        currentCollectionId !== 'Upcoming' ? (
           <RxDragHandleDots2 className="drag-handle" />
         ) : (
           <div className="w-4"></div>
@@ -562,6 +584,59 @@ const Section = ({
           </div>
         </div>
       </Modal>
+    </div>
+  )
+}
+
+const Calendar = ({
+  sections,
+  topVisibleSection,
+  setTopVisibleSection,
+}: {
+  sections: SectionDetailType[] | undefined
+  topVisibleSection: SectionDetailType | undefined
+  setTopVisibleSection: (section: SectionDetailType | undefined) => void
+}) => {
+  // const [today] = useState(new Date())
+  // const [lastSunday] = useState(isSunday(today) ? today : previousSunday(today))
+  // const [upcomingSaturday] = useState(nextSaturday(today))
+  // const [week] = useState(
+  // eachDayOfInterval({ start: lastSunday, end: upcomingSaturday }),
+  // )
+  const [selectedDay, setSelectedDay] = useState(
+    sections ? sections[0].id : '0',
+  )
+  useEffect(() => {
+    if (topVisibleSection && topVisibleSection.id !== selectedDay) {
+      setSelectedDay(topVisibleSection.id)
+      console.log({ topVisibleSection })
+    }
+  }, [topVisibleSection, selectedDay])
+
+  const handleDaySelection = (dayId: string) => {
+    setSelectedDay(dayId)
+    const section = sections?.find((s) => s.id === dayId)
+    if (section) {
+      setTopVisibleSection(section)
+    }
+  }
+
+  return (
+    <div className="p-4 ">
+      <div className="flex gap-2 justify-around">
+        {sections
+          ?.filter((d) => d.id !== 'Overdue')
+          .map((day) => (
+            <button
+              type="button"
+              key={day.id}
+              onClick={() => handleDaySelection(day.id)}
+              className={`${selectedDay === day.id ? 'bg-primary rounded-full flex justify-center items-center w-6 h-6' : ''}`}
+            >
+              {format(new Date(Number(day.id)), 'd')}
+            </button>
+          ))}
+      </div>
     </div>
   )
 }

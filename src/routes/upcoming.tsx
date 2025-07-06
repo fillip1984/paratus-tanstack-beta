@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   eachDayOfInterval,
+  format,
+  isSunday,
   nextSaturday,
   previousSunday,
   startOfDay,
@@ -20,7 +22,7 @@ export const Route = createFileRoute('/upcoming')({
 
 function RouteComponent() {
   const [today] = useState(new Date())
-  const [lastSunday] = useState(previousSunday(today))
+  const [lastSunday] = useState(isSunday(today) ? today : previousSunday(today))
   const [upcomingSaturday] = useState(nextSaturday(today))
   const [_week] = useState(
     eachDayOfInterval({ start: lastSunday, end: upcomingSaturday }),
@@ -30,7 +32,7 @@ function RouteComponent() {
   const { data: tasks } = useQuery(trpc.task.today.queryOptions())
 
   const overdueSection: SectionDetailType = {
-    id: 'overdue',
+    id: 'Overdue',
     name: 'Overdue',
     position: 0,
     tasks:
@@ -44,10 +46,28 @@ function RouteComponent() {
     },
   }
 
+  const daysAsSections: SectionDetailType[] = _week.map((day) => {
+    const dayTasks =
+      tasks?.filter((task) => {
+        if (!task.dueDate) return false
+        return startOfDay(day).getTime() === startOfDay(task.dueDate).getTime()
+      }) ?? []
+
+    return {
+      id: day.getTime().toString(),
+      name: format(day, 'MMM dd - EEE'),
+      position: day.getTime(),
+      tasks: dayTasks,
+      _count: {
+        tasks: dayTasks.length,
+      },
+    } satisfies SectionDetailType
+  })
+
   const upcoming = {
     name: 'Upcoming',
-    id: 'upcoming',
-    sections: [overdueSection],
+    id: 'Upcoming',
+    sections: [overdueSection, ...daysAsSections],
     position: -1,
   } satisfies CollectionDetailType
 

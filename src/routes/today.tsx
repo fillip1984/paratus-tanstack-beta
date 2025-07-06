@@ -21,7 +21,7 @@ function RouteComponent() {
   const trpc = useTRPC()
   const { data: tasks } = useQuery(trpc.task.today.queryOptions())
   const overdueSection: SectionDetailType = {
-    id: 'overdue',
+    id: 'Overdue',
     name: 'Overdue',
     position: 0,
     tasks:
@@ -35,7 +35,7 @@ function RouteComponent() {
     },
   }
   const todaySection: SectionDetailType = {
-    id: 'today',
+    id: 'Today',
     name: format(new Date(), "MMM do '- Today - ' EEEE"),
     position: 1,
     tasks:
@@ -48,7 +48,7 @@ function RouteComponent() {
   }
   const today = {
     name: 'Today',
-    id: 'today',
+    id: 'Today',
     sections: [overdueSection, todaySection],
   } as CollectionDetailType
 
